@@ -1,0 +1,4 @@
+To run:
+cd Source
+cd Server
+npm install express

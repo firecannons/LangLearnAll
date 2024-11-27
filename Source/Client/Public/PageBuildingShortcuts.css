@@ -1,0 +1,13 @@
+/* To be used in conjunction with PageBuildShortcuts.js */
+
+.genericList
+{
+  display: flex;
+  flex-direction: column;
+}
+
+.genericTitleHolder
+{
+  display: flex;
+  justify-content: center;
+}

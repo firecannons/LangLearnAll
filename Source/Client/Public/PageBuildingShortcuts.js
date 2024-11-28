@@ -36,10 +36,33 @@ function addGenericList(holdingElement)
 function addPageHoldingDiv()
 {
   let holdingDiv = addDiv(document.body)
+  addClassToElement(holdingDiv, 'pageHoldingDiv')
   return holdingDiv
 }
 
 function addClassToElement(element, className)
 {
   element.classList.add(className)
+}
+
+function addTextHoldingDiv(holdingElement, text)
+{
+  let textHoldingDiv = addDiv(holdingElement)
+  textHoldingDiv.innerText = text
+  return textHoldingDiv
+}
+
+function addGenericButton(holdingElement, text)
+{
+  let genericButton = addTextHoldingDiv(holdingElement, text)
+  addClassToElement(genericButton, 'genericButton')
+  return genericButton
+}
+
+function addGenericCreateButton(holdingElement, text)
+{
+  let buttonHolder = addDiv(holdingElement)
+  let genericCreateButton = addGenericButton(buttonHolder, text)
+  addClassToElement(genericCreateButton, 'createButton')
+  return genericCreateButton
 }

@@ -1,3 +1,9 @@
+async function fetchDataShortcut(path, body)
+{
+  let output = fetchShortcut(path, 'data', body)
+  return output
+}
+
 async function fetchShortcut(path, jsonAttribute, body)
 {
   let inside = {

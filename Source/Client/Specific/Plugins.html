@@ -5,13 +5,16 @@
 <script src="/Public/NetworkShortcuts.js"></script>
 <script src='/Public/PageBuildingShortcuts.js'></script>
 <link href="/Public/PageBuildingShortcuts.css" rel="stylesheet">
+<script src='/Public/PluginListShortcuts.js'></script>
 <script>
+
   
-  function createPage()
+  async function createPage()
   {
-    let holdingDiv = addPageHoldingDiv()
-    addGenericTitle(holdingDiv, 'Plugins')
-    let pluginList = addGenericList(holdingDiv)
+    let holdingDiv = await addPageHoldingDiv()
+    await addGenericTitle(holdingDiv, 'Plugins')
+    let createButton = await addGenericCreateButton(holdingDiv, 'Create Plugin')
+    await addPluginList(holdingDiv)
   }
   
   createPage()

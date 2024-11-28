@@ -4,10 +4,36 @@
 {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .genericTitleHolder
 {
   display: flex;
   justify-content: center;
+}
+
+.genericButton
+{
+  background-color: #22bb33;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.createButton
+{
+  border-radius: 5px;
+  color: white;
+}
+
+.pageHoldingDiv
+{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }

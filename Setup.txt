@@ -1,4 +1,9 @@
 To run:
 cd Source
 cd Server
+node app.js
+
+To install:
+cd Source
+cd Server
 npm install express

@@ -12,7 +12,7 @@ module.exports = {
   // text file path
   TFP: '../data/data.txt',
   
-  
+  RETRIEVE_ALL_PLUGINS_PATH: 'retrieveAllPlugins',
   
   
   
@@ -30,6 +30,8 @@ module.exports = {
     app.get('/Plugins', function(req, res) {
         res.sendFile( path.resolve( __dirname + '/../Client/Specific/Plugins.html' ) );
     })
+    
+    app.post('/' + this.RETRIEVE_ALL_PLUGINS_PATH, await this.lookupAllPlugins.bind(this))
   },
   
   appListen: async function(app)
@@ -48,5 +50,11 @@ module.exports = {
     
     await this.appListen(app)
   },
+  
+  lookupAllPlugins: async function(req, res)
+  {
+    let d = req.body
+    return res.json({'data': []})
+  }
 
 }

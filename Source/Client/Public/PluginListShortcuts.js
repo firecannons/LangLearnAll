@@ -4,23 +4,18 @@
 <script src='/Public/PageBuildingShortcuts.js'></script>
 <link href="/Public/PageBuildingShortcuts.css" rel="stylesheet">
 <link href="/Public/PluginListShortcuts.css" rel="stylesheet">
+<script src='/Public/DataListShortcuts.js'></script>
 * 
 * 
 * Intended to be used in conjunction with PluginListShortcuts.css
 * */
 
 
-const RETRIEVE_ALL_DATA_LIST_ITEMS_PATH = '/retrieveAllDataListItems'
-const SAVE_NEW_PLUGIN_PATH = '/saveNewPlugin'
-
 const CREATE_PLUGIN_DEFAULT_NAME = 'Unnamed Plugin'
 
 const NEW_PLUGIN_DEFAULT_OBJECT = {'name': CREATE_PLUGIN_DEFAULT_NAME}
 
-
-const DATA_LIST_ID_FIELD_NAME = 'id'
-const DATA_LIST_ALL_TIME_COUNT_FIELD_NAME = 'allTimeCount'
-const DATA_LIST_LIST_FIELD_NAME = 'list'
+const PLUGIN_COLLETION_NAME = 'plugins'
 
 
 async function createPlugin(pluginList)
@@ -38,8 +33,7 @@ async function deepCopyObject(object)
 
 async function saveNewPlugin(newPlugin)
 {
-  let body = newPlugin
-  newPlugin = await fetchDataShortcut(SAVE_NEW_PLUGIN_PATH, body)
+  newPlugin = await saveNewDataListObject(newPlugin, PLUGIN_COLLETION_NAME)
   return newPlugin
 }
 
@@ -87,10 +81,10 @@ async function insertPluginsToList(plugins, pluginListDiv)
 
 async function retrieveAllPlugins()
 {
-  let body = {'collection': 'plugins'}
-  let plugins = await fetchDataShortcut(RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, body)
+  let plugins = await retrieveAlltemsFromDataList(PLUGIN_COLLETION_NAME)
   return plugins
 }
+
 
 async function insertPluginToList(plugin, pluginListDiv)
 {

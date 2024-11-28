@@ -7,26 +7,23 @@ const bodyParser = require('body-parser')
 module.exports = {
   PORT: 3004,
   
-  DATA_FOLDER_NAME: 'Data/',
-  
-  PLUGINS_FOLDER_NAME: 'Plugins/',
-  
-  PATH_FROM_THIS_CODE_FILE_TO_REPO_BASE_LOCATION: '../../',
   
   
   
+  DEFAULT_RETURN_FIELD: 'data',
   
   RETRIEVE_ALL_DATA_LIST_ITEMS_PATH: 'retrieveDataListItems',
   
-  
   SAVE_NEW_PLUGIN_PATH: 'saveNewPlugin',
   
+  
   DATA_LIST_FILE_START_OBJECT: {'allTimeCount': 0, 'list': []},
+  
   DATA_LIST_ID_FIELD_NAME: 'id',
   DATA_LIST_ALL_TIME_COUNT_FIELD_NAME: 'allTimeCount',
   DATA_LIST_LIST_FIELD_NAME: 'list',
   
-  DEFAULT_RETURN_FIELD: 'data',
+  PATH_FROM_THIS_CODE_FILE_TO_REPO_BASE_LOCATION: '../../',
   
   DATA_LISTS = {
     'plugins': {
@@ -34,6 +31,8 @@ module.exports = {
       'dataFileName': 'pluginsData.txt'
     }
   },
+  
+  COLLECTION_FIELD_NAME: 'collection',
   
   
   
@@ -85,7 +84,8 @@ module.exports = {
   lookupAllDataListItems: async function(req, res)
   {
     let data = req.body
-    let typeData = await this.getDataListTypeDataFromTypeName(data.type)
+    let collectionData = await this.getDataListTypeDataFromTypeName(data)
+    await this.createDataListFileIfNotExist(collectionData)
     await this.createFolderIfNotExist(await this.getDataFolderPath())
     await this.createFolderIfNotExist(await this.getPluginsFolderPath())
     let plugins = await this.readDataListFileJSON(await this.getPluginsDataFilePath())
@@ -94,8 +94,8 @@ module.exports = {
   
   getDataListTypeDataFromTypeName: async function(type)
   {
-    let typeData = this.DATA_LISTS['type']
-    return typeData
+    let collectionData = this.DATA_LISTS[this.COLLECTION_FIELD_NAME]
+    return collectionData
   },
   
   readDataListFileJSON: async function(path)
@@ -111,6 +111,7 @@ module.exports = {
   saveNewPlugin: async function(req, res)
   {
     let newPlugin = req.body
+    await this.createDataListFileIfNotExist(collectionData)
     await this.createFolderIfNotExist(await this.getDataFolderPath())
     await this.createFolderIfNotExist(await this.getPluginsFolderPath())
     await this.saveNewObjectToPluginsDataListFile(newPlugin)
@@ -155,6 +156,11 @@ module.exports = {
   async increaseDataListAllTimeCountByOne(data)
   {
     data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] = data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + 1
+  },
+  
+  createDataListFileIfNotExist: async function(collectionData)
+  {
+    this.createFolderIfNotExist(collectionData)
   },
   
   async writeJSONDataFile(path, inputJSON)
@@ -223,7 +229,7 @@ module.exports = {
   {
     if (await fs.existsSync(path) == false)
     {
-      await fs.mkdirSync(path)
+      await fs.mkdirSync(path, { recursive: true })
     }
   }
 

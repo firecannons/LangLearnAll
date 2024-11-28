@@ -10,7 +10,7 @@
 * */
 
 
-const RETRIEVE_ALL_PLUGINS_PATH = '/retrieveAllPlugins'
+const RETRIEVE_ALL_DATA_LIST_ITEMS_PATH = '/retrieveAllDataListItems'
 const SAVE_NEW_PLUGIN_PATH = '/saveNewPlugin'
 
 const CREATE_PLUGIN_DEFAULT_NAME = 'Unnamed Plugin'
@@ -76,7 +76,6 @@ async function retrieveAndInsertPluginsToList(pluginListDiv)
 
 async function insertPluginsToList(plugins, pluginListDiv)
 {
-  console.log('fwe', plugins)
   if(plugins != null)
   {
     for(let plugin of plugins[DATA_LIST_LIST_FIELD_NAME])
@@ -88,7 +87,8 @@ async function insertPluginsToList(plugins, pluginListDiv)
 
 async function retrieveAllPlugins()
 {
-  let plugins = await fetchDataShortcut(RETRIEVE_ALL_PLUGINS_PATH)
+  let body = {'collection': 'plugins'}
+  let plugins = await fetchDataShortcut(RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, body)
   return plugins
 }
 

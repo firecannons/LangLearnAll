@@ -14,12 +14,9 @@ module.exports = {
   PATH_FROM_THIS_CODE_FILE_TO_REPO_BASE_LOCATION: '../../',
   
   
-  PLUGINS_DATA_FILE_NAME: 'pluginsData.txt',
   
   
-  
-  
-  RETRIEVE_ALL_PLUGINS_PATH: 'retrieveAllPlugins',
+  RETRIEVE_ALL_DATA_LIST_ITEMS_PATH: 'retrieveDataListItems',
   
   
   SAVE_NEW_PLUGIN_PATH: 'saveNewPlugin',
@@ -30,6 +27,13 @@ module.exports = {
   DATA_LIST_LIST_FIELD_NAME: 'list',
   
   DEFAULT_RETURN_FIELD: 'data',
+  
+  DATA_LISTS = {
+    'plugins': {
+      'folderPath': this.getPluginsFolderPath(),
+      'dataFileName': 'pluginsData.txt'
+    }
+  },
   
   
   
@@ -48,7 +52,7 @@ module.exports = {
         res.sendFile( path.resolve( __dirname + '/../Client/Specific/Plugins.html' ) );
     })
     
-    app.post('/' + this.RETRIEVE_ALL_PLUGINS_PATH, await this.lookupAllPlugins.bind(this))
+    app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllPlugins.bind(this))
     
     app.post('/' + this.SAVE_NEW_PLUGIN_PATH, await this.saveNewPlugin.bind(this))
   },
@@ -78,13 +82,20 @@ module.exports = {
     await this.appListen(app)
   },
   
-  lookupAllPlugins: async function(req, res)
+  lookupAllDataListItems: async function(req, res)
   {
-    let d = req.body
+    let data = req.body
+    let typeData = await this.getDataListTypeDataFromTypeName(data.type)
     await this.createFolderIfNotExist(await this.getDataFolderPath())
     await this.createFolderIfNotExist(await this.getPluginsFolderPath())
     let plugins = await this.readDataListFileJSON(await this.getPluginsDataFilePath())
     return res.json({[this.DEFAULT_RETURN_FIELD]: plugins})
+  },
+  
+  getDataListTypeDataFromTypeName: async function(type)
+  {
+    let typeData = this.DATA_LISTS['type']
+    return typeData
   },
   
   readDataListFileJSON: async function(path)

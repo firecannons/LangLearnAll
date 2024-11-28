@@ -1,6 +1,7 @@
 async function fetchDataShortcut(path, body)
 {
-  let output = fetchShortcut(path, 'data', body)
+  let output = await fetchShortcut(path, 'data', body)
+  console.log('few', output, path, body)
   return output
 }
 

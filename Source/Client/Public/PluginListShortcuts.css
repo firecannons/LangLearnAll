@@ -1,0 +1,9 @@
+/* To be used in conjunction with PluginListShortcuts.js */
+
+.pluginListItemHolder
+{
+  padding: 10px;
+  background-color: #dddddd;
+  margin: 5px;
+  border-radius: 5px;
+}

@@ -2,10 +2,9 @@
 
 function addGenericTitle(holdingElement, text)
 {
-  let titleDiv = addDiv(holdingElement)
+  let titleDiv = addTextHoldingDiv(holdingElement, text)
   addClassToElement(titleDiv, 'genericTitleHolder')
-  let title = addElement(titleDiv, 'h1')
-  setElementText(title, text)
+  setElementText(titleDiv, text)
   return titleDiv
 }
 
@@ -31,6 +30,7 @@ function addGenericList(holdingElement)
 {
   let genericList = addDiv(holdingElement)
   addClassToElement(genericList, 'genericList')
+  return genericList
 }
 
 function addPageHoldingDiv()
@@ -48,7 +48,7 @@ function addClassToElement(element, className)
 function addTextHoldingDiv(holdingElement, text)
 {
   let textHoldingDiv = addDiv(holdingElement)
-  textHoldingDiv.innerText = text
+  setElementText(textHoldingDiv, text)
   return textHoldingDiv
 }
 

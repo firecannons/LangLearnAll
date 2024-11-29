@@ -1,5 +1,5 @@
 {
-  "allTimeCount": 5,
+  "allTimeCount": 14,
   "list": [
     {
       "name": "Unnamed Plugin",
@@ -20,6 +20,35 @@
     {
       "name": "Unnamed Plugin",
       "id": 4
+    },
+    {
+      "id": 5
+    },
+    {
+      "id": 6
+    },
+    {
+      "id": 7
+    },
+    {
+      "id": 8
+    },
+    {
+      "id": 9
+    },
+    {
+      "id": 10
+    },
+    {
+      "id": 11
+    },
+    {
+      "name": "Unnamed Plugin",
+      "id": 12
+    },
+    {
+      "name": "Unnamed Plugin",
+      "id": 13
     }
   ]
 }

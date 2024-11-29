@@ -12,9 +12,9 @@ module.exports = {
   
   DEFAULT_RETURN_FIELD: 'data',
   
-  RETRIEVE_ALL_DATA_LIST_ITEMS_PATH: 'retrieveDataListItems',
+  RETRIEVE_ALL_DATA_LIST_ITEMS_PATH: 'retrieveAllDataListItems',
   
-  SAVE_NEW_PLUGIN_PATH: 'saveNewPlugin',
+  SAVE_NEW_DATA_LIST_ITEM_PATH: 'saveNewDataListItem',
   
   
   DATA_LIST_FILE_START_OBJECT: {'allTimeCount': 0, 'list': []},
@@ -24,15 +24,18 @@ module.exports = {
   DATA_LIST_LIST_FIELD_NAME: 'list',
   
   PATH_FROM_THIS_CODE_FILE_TO_REPO_BASE_LOCATION: '../../',
+  DATA_FOLDER_NAME: 'data',
   
-  DATA_LISTS = {
+  DATA_LISTS: {
     'plugins': {
-      'folderPath': this.getPluginsFolderPath(),
+      'folderName': 'plugins',
       'dataFileName': 'pluginsData.txt'
     }
   },
   
   COLLECTION_FIELD_NAME: 'collection',
+  
+  INCOMING_ITEM_FIELD_NAME: 'item',
   
   
   
@@ -51,9 +54,9 @@ module.exports = {
         res.sendFile( path.resolve( __dirname + '/../Client/Specific/Plugins.html' ) );
     })
     
-    app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllPlugins.bind(this))
+    app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllDataListItems.bind(this))
     
-    app.post('/' + this.SAVE_NEW_PLUGIN_PATH, await this.saveNewPlugin.bind(this))
+    app.post('/' + this.SAVE_NEW_DATA_LIST_ITEM_PATH, await this.saveNewDataListItem.bind(this))
   },
   
   appListen: async function(app)
@@ -83,54 +86,50 @@ module.exports = {
   
   lookupAllDataListItems: async function(req, res)
   {
-    let data = req.body
-    let collectionData = await this.getDataListTypeDataFromTypeName(data)
-    await this.createDataListFileIfNotExist(collectionData)
-    await this.createFolderIfNotExist(await this.getDataFolderPath())
-    await this.createFolderIfNotExist(await this.getPluginsFolderPath())
-    let plugins = await this.readDataListFileJSON(await this.getPluginsDataFilePath())
-    return res.json({[this.DEFAULT_RETURN_FIELD]: plugins})
+    let collectionData = await this.getDataListCollectionFromInput(req.body)
+    await this.createDataListFileAndPathIfNotExist(collectionData)
+    let dataItems = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    return res.json({[this.DEFAULT_RETURN_FIELD]: dataItems})
   },
   
-  getDataListTypeDataFromTypeName: async function(type)
+  getDataListCollectionFromInput: async function(dataListSpecifierObject)
   {
-    let collectionData = this.DATA_LISTS[this.COLLECTION_FIELD_NAME]
+    let collectionData = this.DATA_LISTS[dataListSpecifierObject[this.COLLECTION_FIELD_NAME]]
     return collectionData
   },
   
-  readDataListFileJSON: async function(path)
+  saveNewDataListItem: async function(req, res)
   {
+    let collectionData = await this.getDataListCollectionFromInput(req.body)
+    let item = await this.getDataListIncomingItem(req.body)
+    await this.createDataListFileAndPathIfNotExist(collectionData)
+    await this.saveNewObjectToDataListDataFile(item, collectionData)
+    return res.json({[this.DEFAULT_RETURN_FIELD]: item})
+  },
+  
+  getDataListIncomingItem: async function(collectionData)
+  {
+    let item = collectionData[this.INCOMING_ITEM_FIELD_NAME]
+    return item
+  },
+  
+  saveNewObjectToDataListDataFile: async function(newItem, collectionData)
+  {
+    let data = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    await this.addObjectToDataList(newItem, data)
+    await this.writeJSONDataListDataFileFromCollectionData(collectionData, data)
+  },
+  
+  readJSONDataListDataFileFromCollectionData: async function(collectionData)
+  {
+    let path = await this.getDataListFolderDataFilePath(collectionData)
     let data = await this.readJSONDataFile(path)
-    if(data == null)
-    {
-      data = await this.getDeepCopiedDataListStartObject()
-    }
     return data
   },
   
-  saveNewPlugin: async function(req, res)
+  writeJSONDataListDataFileFromCollectionData: async function(collectionData, data)
   {
-    let newPlugin = req.body
-    await this.createDataListFileIfNotExist(collectionData)
-    await this.createFolderIfNotExist(await this.getDataFolderPath())
-    await this.createFolderIfNotExist(await this.getPluginsFolderPath())
-    await this.saveNewObjectToPluginsDataListFile(newPlugin)
-    return res.json({[this.DEFAULT_RETURN_FIELD]: newPlugin})
-  },
-  
-  saveNewObjectToPluginsDataListFile: async function(newPlugin)
-  {
-    await this.saveNewObjectToDataListFile(newPlugin, await this.getPluginsDataFilePath())
-  },
-  
-  saveNewObjectToDataListFile: async function(newPlugin, path)
-  {
-    let data = await this.readJSONDataFile(path)
-    if(data == null)
-    {
-      data = await this.getDeepCopiedDataListStartObject()
-    }
-    await this.addObjectToDataList(newPlugin, data)
+    let path = await this.getDataListFolderDataFilePath(collectionData)
     await this.writeJSONDataFile(path, data)
   },
   
@@ -158,12 +157,34 @@ module.exports = {
     data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] = data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + 1
   },
   
-  createDataListFileIfNotExist: async function(collectionData)
+  createDataListFileAndPathIfNotExist: async function(collectionData)
   {
-    this.createFolderIfNotExist(collectionData)
+    await this.createDataListFolderIfNotExistscollectionData(collectionData)
+    await this.createDataListFileIfNotExist(collectionData)
   },
   
-  async writeJSONDataFile(path, inputJSON)
+  createDataListFolderIfNotExistscollectionData: async function(collectionData)
+  {
+    let path = await this.getDataListFolderPath(collectionData)
+    await this.createFolderIfNotExist(path)
+  },
+  
+  createDataListFileIfNotExist: async function(collectionData)
+  {
+    let path = await this.getDataListFolderDataFilePath(collectionData)
+    if (await fs.existsSync(path) == false)
+    {
+      await this.createDefaultDataListFile(path)
+    }
+  },
+  
+  createDefaultDataListFile: async function(path)
+  {
+    data = await this.getDeepCopiedDataListStartObject()
+    await this.writeJSONDataFile(path, data)
+  },
+  
+  writeJSONDataFile: async function(path, inputJSON)
   {
     await this.writeDataFile(path, await JSON.stringify(inputJSON, null, 2))
   },
@@ -213,15 +234,15 @@ module.exports = {
     return p
   },
   
-  getPluginsFolderPath: async function()
+  getDataListFolderPath: async function(collectionData)
   {
-    let p = await path.join(await this.getDataFolderPath(), this.PLUGINS_FOLDER_NAME)
+    let p = await path.join(await this.getDataFolderPath(), collectionData['folderName'])
     return p
   },
   
-  getPluginsDataFilePath: async function()
+  getDataListFolderDataFilePath: async function(collectionData)
   {
-    let p = await path.join(await this.getPluginsFolderPath(), this.PLUGINS_DATA_FILE_NAME)
+    let p = await path.join(await this.getDataListFolderPath(collectionData), collectionData['dataFileName'])
     return p
   },
   

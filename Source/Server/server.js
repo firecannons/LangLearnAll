@@ -15,9 +15,10 @@ module.exports = {
   RETRIEVE_ALL_DATA_LIST_ITEMS_PATH: 'retrieveAllDataListItems',
   
   SAVE_NEW_DATA_LIST_ITEM_PATH: 'saveNewDataListItem',
+  DELETE_DATA_LIST_ITEM_PATH: 'deleteDataListItem',
   
   
-  DATA_LIST_FILE_START_OBJECT: {'allTimeCount': 0, 'list': []},
+  DATA_LIST_FILE_START_OBJECT: {'allTimeCount': 0, 'list': {}},
   
   DATA_LIST_ID_FIELD_NAME: 'id',
   DATA_LIST_ALL_TIME_COUNT_FIELD_NAME: 'allTimeCount',
@@ -57,6 +58,8 @@ module.exports = {
     app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllDataListItems.bind(this))
     
     app.post('/' + this.SAVE_NEW_DATA_LIST_ITEM_PATH, await this.saveNewDataListItem.bind(this))
+    
+    app.post('/' + this.DELETE_DATA_LIST_ITEM_PATH, await this.deleteDataListItem.bind(this))
   },
   
   appListen: async function(app)
@@ -107,6 +110,29 @@ module.exports = {
     return res.json({[this.DEFAULT_RETURN_FIELD]: item})
   },
   
+  deleteDataListItem: async function(req, res)
+  {
+    let collectionData = await this.getDataListCollectionFromInput(req.body)
+    let item = await this.getDataListIncomingItem(req.body)
+    await this.createDataListFileAndPathIfNotExist(collectionData)
+    await this.deleteItemFromDataListDataFile(item, collectionData)
+    return res.json({[this.DEFAULT_RETURN_FIELD]: item})
+  },
+  
+  deleteItemFromDataListDataFile: async function(item, collectionData)
+  {
+    let data = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    await this.deleteItemFromDataList(item, data)
+    await this.writeJSONDataListDataFileFromCollectionData(collectionData, data)
+  },
+  
+  deleteItemFromDataList: async function(item, data)
+  {
+    let list = data[this.DATA_LIST_LIST_FIELD_NAME]
+    await delete list[item[this.DATA_LIST_ID_FIELD_NAME]]
+    console.log('datalist delete', data, list, item)
+  },
+  
   getDataListIncomingItem: async function(collectionData)
   {
     let item = collectionData[this.INCOMING_ITEM_FIELD_NAME]
@@ -148,7 +174,8 @@ module.exports = {
   async addObjectToDataList(object, data)
   {
     object[this.DATA_LIST_ID_FIELD_NAME] = data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
-    await data[this.DATA_LIST_LIST_FIELD_NAME].push(object)
+    let list = await data[this.DATA_LIST_LIST_FIELD_NAME]
+    list[object[this.DATA_LIST_ID_FIELD_NAME]] = object
     await this.increaseDataListAllTimeCountByOne(data)
   },
   
@@ -159,11 +186,11 @@ module.exports = {
   
   createDataListFileAndPathIfNotExist: async function(collectionData)
   {
-    await this.createDataListFolderIfNotExistscollectionData(collectionData)
+    await this.createDataListFolderIfNotExistsFromCollectionData(collectionData)
     await this.createDataListFileIfNotExist(collectionData)
   },
   
-  createDataListFolderIfNotExistscollectionData: async function(collectionData)
+  createDataListFolderIfNotExistsFromCollectionData: async function(collectionData)
   {
     let path = await this.getDataListFolderPath(collectionData)
     await this.createFolderIfNotExist(path)

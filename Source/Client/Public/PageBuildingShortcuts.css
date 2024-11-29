@@ -18,18 +18,24 @@
 
 .genericButton
 {
-  background-color: #22bb33;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
   font-size: 20px;
+  border-radius: 5px;
+  color: white;
+  background-color: #2244bb;
 }
 
 .createButton
 {
-  border-radius: 5px;
-  color: white;
+  background-color: #22bb33;
+}
+
+.deleteButton
+{
+  background-color: #ff3333;
 }
 
 .pageHoldingDiv

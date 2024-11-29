@@ -72,7 +72,7 @@ async function insertPluginsToList(plugins, pluginListDiv)
 {
   if(plugins != null)
   {
-    for(let plugin of plugins[DATA_LIST_LIST_FIELD_NAME])
+    for(let plugin of await Object.values(plugins[DATA_LIST_LIST_FIELD_NAME]))
     {
       await insertPluginToList(plugin, pluginListDiv)
     }
@@ -92,4 +92,31 @@ async function insertPluginToList(plugin, pluginListDiv)
   await addClassToElement(listItemHolder, 'pluginListItemHolder')
   await addTextHoldingDiv(listItemHolder, 'Id: ' + plugin['id'])
   await addTextHoldingDiv(listItemHolder, 'Name: ' + plugin['name'])
+  await addActionsButtonsToPluginElement(listItemHolder, plugin)
+}
+
+async function addActionsButtonsToPluginElement(listItemHolder, plugin)
+{
+  let actionButtonsHolder = await addDiv(listItemHolder)
+  let deleteButton = await addGenericDeleteButton(actionButtonsHolder, 'Delete Plugin')
+  await addClassToElement(actionButtonsHolder, 'pluginActionButtonsHolder')
+  await addReactionToElement(deleteButton, 'click', await deletePlugin.bind(null, plugin, listItemHolder))
+  
+}
+
+async function deletePlugin(plugin, listItemHolder)
+{
+  await sendDeletePluginMessage(plugin)
+  await deletePluginElementFromList(listItemHolder)
+}
+
+async function deletePluginElementFromList(listItemHolder)
+{
+  await listItemHolder.remove()
+}
+
+async function sendDeletePluginMessage(plugin)
+{
+  plugin = await deleteDataListItem(plugin, PLUGIN_COLLETION_NAME)
+  return plugin
 }

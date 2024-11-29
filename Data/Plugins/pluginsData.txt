@@ -1,54 +1,13 @@
 {
-  "allTimeCount": 14,
-  "list": [
-    {
+  "allTimeCount": 21,
+  "list": {
+    "0": {
       "name": "Unnamed Plugin",
       "id": 0
     },
-    {
+    "20": {
       "name": "Unnamed Plugin",
-      "id": 1
-    },
-    {
-      "name": "Unnamed Plugin",
-      "id": 2
-    },
-    {
-      "name": "Unnamed Plugin",
-      "id": 3
-    },
-    {
-      "name": "Unnamed Plugin",
-      "id": 4
-    },
-    {
-      "id": 5
-    },
-    {
-      "id": 6
-    },
-    {
-      "id": 7
-    },
-    {
-      "id": 8
-    },
-    {
-      "id": 9
-    },
-    {
-      "id": 10
-    },
-    {
-      "id": 11
-    },
-    {
-      "name": "Unnamed Plugin",
-      "id": 12
-    },
-    {
-      "name": "Unnamed Plugin",
-      "id": 13
+      "id": 20
     }
-  ]
+  }
 }

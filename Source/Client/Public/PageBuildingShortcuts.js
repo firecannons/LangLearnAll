@@ -66,3 +66,12 @@ function addGenericCreateButton(holdingElement, text)
   addClassToElement(genericCreateButton, 'createButton')
   return genericCreateButton
 }
+
+function addGenericDeleteButton(holdingElement, text)
+{
+  let buttonHolder = addDiv(holdingElement)
+  let genericButton = addGenericButton(buttonHolder, text)
+  addClassToElement(genericButton, 'deleteButton')
+  return genericButton
+}
+

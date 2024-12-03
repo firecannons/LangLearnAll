@@ -38,6 +38,8 @@ module.exports = {
   
   INCOMING_ITEM_FIELD_NAME: 'item',
   
+  ITEM_DATA_FIELD_NAME: 'itemData',
+  
   
   
   createNewWebServer: async function()
@@ -135,15 +137,44 @@ module.exports = {
   
   getDataListIncomingItem: async function(collectionData)
   {
-    let item = collectionData[this.INCOMING_ITEM_FIELD_NAME]
+    let item = collectionData[this.INCOMING_ITEM_FIELD_NAME][this.ITEM_DATA_FIELD_NAME]
     return item
   },
   
   saveNewObjectToDataListDataFile: async function(newItem, collectionData)
   {
     let data = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    await this.addObjectToDataList(newItem, data)
+    let referenceObject = await this.addObjectToDataList(newItem, data)
+    await this.saveDataListItemDataFile(collectionData, referenceObject, newItem)
+    await this.saveDataListDataFile(collectionData, data)
+  },
+  
+  saveDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  {
+    await this.writeDataListItemDataFile(collectionData, referenceObject, newItem)
+  },
+  
+  saveDataListDataFile: async function(collectionData, data)
+  {
     await this.writeJSONDataListDataFileFromCollectionData(collectionData, data)
+  },
+  
+  writeDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  {
+    await this.createDataListItemDataFolderIfNotExists(collectionData, referenceObject)
+    await this.writeJSONToDataListItemDataFile(collectionData, referenceObject, newItem)
+  },
+  
+  writeJSONToDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  {
+    let path = await this.getDataListItemDataFilePath(collectionData, referenceObject)
+    await this.writeJSONTextFile(path, newItem)
+  },
+  
+  createDataListItemDataFolderIfNotExists: async function(collectionData, referenceObject)
+  {
+    let path = await this.getDataListItemDataFolderPath(collectionData, referenceObject)
+    await this.createFolderIfNotExist(path)
   },
   
   readJSONDataListDataFileFromCollectionData: async function(collectionData)
@@ -156,7 +187,7 @@ module.exports = {
   writeJSONDataListDataFileFromCollectionData: async function(collectionData, data)
   {
     let path = await this.getDataListFolderDataFilePath(collectionData)
-    await this.writeJSONDataFile(path, data)
+    await this.writeJSONTextFile(path, data)
   },
   
   getDeepCopiedDataListStartObject: async function()
@@ -173,10 +204,16 @@ module.exports = {
   
   async addObjectToDataList(object, data)
   {
+    let referenceObject = {
+      'id': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
+      'dataItemFolderName': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
+      'dataItemFileName': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + '.txt'
+    }
     object[this.DATA_LIST_ID_FIELD_NAME] = data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
     let list = await data[this.DATA_LIST_LIST_FIELD_NAME]
-    list[object[this.DATA_LIST_ID_FIELD_NAME]] = object
+    list[object[this.DATA_LIST_ID_FIELD_NAME]] = referenceObject
     await this.increaseDataListAllTimeCountByOne(data)
+    return referenceObject
   },
   
   async increaseDataListAllTimeCountByOne(data)
@@ -205,13 +242,21 @@ module.exports = {
     }
   },
   
+  createJsonTextFileIfNotExist: async function(path, data)
+  {
+    if (await fs.existsSync(path) == false)
+    {
+      await this.writeJSONTextFile(path, data)
+    }
+  },
+  
   createDefaultDataListFile: async function(path)
   {
     data = await this.getDeepCopiedDataListStartObject()
-    await this.writeJSONDataFile(path, data)
+    await this.createJsonTextFileIfNotExist(path, data)
   },
   
-  writeJSONDataFile: async function(path, inputJSON)
+  writeJSONTextFile: async function(path, inputJSON)
   {
     await this.writeDataFile(path, await JSON.stringify(inputJSON, null, 2))
   },
@@ -267,7 +312,19 @@ module.exports = {
     return p
   },
   
-  getDataListFolderDataFilePath: async function(collectionData)
+  getDataListItemDataFolderPath: async function(collectionData, referenceObject)
+  {
+    let p = await path.join(await this.getDataListFolderPath(collectionData), referenceObject['dataItemFolderName'].toString())
+    return p
+  },
+  
+  getDataListItemDataFilePath: async function(collectionData, referenceObject)
+  {
+    let p = await path.join(await this.getDataListItemDataFolderPath(collectionData, referenceObject), referenceObject['dataItemFileName'])
+    return p
+  },
+  
+  getDataListFolderDataFilePath: async function(collectionData, referenceObject)
   {
     let p = await path.join(await this.getDataListFolderPath(collectionData), collectionData['dataFileName'])
     return p

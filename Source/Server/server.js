@@ -93,8 +93,28 @@ module.exports = {
   {
     let collectionData = await this.getDataListCollectionFromInput(req.body)
     await this.createDataListFileAndPathIfNotExist(collectionData)
-    let dataItems = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let dataItems = await this.getAllDataListItems(collectionData)
     return res.json({[this.DEFAULT_RETURN_FIELD]: dataItems})
+  },
+  
+  getAllDataListItems: async function(collectionData)
+  {
+    let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let dataListWithItems = await this.readDataListItems(collectionData, dataList)
+    return dataListWithItems
+  },
+  
+  readDataListItems: async function(collectionData, dataList)
+  {
+    let listDataItself = dataList[this.DATA_LIST_LIST_FIELD_NAME]
+    let dataListKeys = await Object.keys(listDataItself)
+    for(let itemKey of dataListKeys)
+    {
+      let referenceObject = listDataItself[itemKey]
+      let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+      listDataItself[itemKey][this.ITEM_DATA_FIELD_NAME] = dataItem
+    }
+    return dataList
   },
   
   getDataListCollectionFromInput: async function(dataListSpecifierObject)
@@ -109,6 +129,7 @@ module.exports = {
     let item = await this.getDataListIncomingItem(req.body)
     await this.createDataListFileAndPathIfNotExist(collectionData)
     await this.saveNewObjectToDataListDataFile(item, collectionData)
+    console.log('return item', item)
     return res.json({[this.DEFAULT_RETURN_FIELD]: item})
   },
   
@@ -117,46 +138,89 @@ module.exports = {
     let collectionData = await this.getDataListCollectionFromInput(req.body)
     let item = await this.getDataListIncomingItem(req.body)
     await this.createDataListFileAndPathIfNotExist(collectionData)
-    await this.deleteItemFromDataListDataFile(item, collectionData)
+    await this.deleteItemFromDataList(item, collectionData)
     return res.json({[this.DEFAULT_RETURN_FIELD]: item})
+  },
+  
+  deleteItemFromDataList: async function(item, collectionData)
+  {
+    await this.deleteItemSelfDataFile(item, collectionData)
+    await this.deleteItemFromDataListDataFile(item, collectionData)
   },
   
   deleteItemFromDataListDataFile: async function(item, collectionData)
   {
-    let data = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    await this.deleteItemFromDataList(item, data)
-    await this.writeJSONDataListDataFileFromCollectionData(collectionData, data)
+    let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let referenceObject = await this.getReferenceObject(item, dataList)
+    await this.deleteDataListItemFromDataList(item, dataList)
+    await this.writeJSONDataListDataFileFromCollectionData(collectionData, dataList)
   },
   
-  deleteItemFromDataList: async function(item, data)
+  deleteItemSelfDataFile: async function(item, collectionData)
   {
-    let list = data[this.DATA_LIST_LIST_FIELD_NAME]
-    await delete list[item[this.DATA_LIST_ID_FIELD_NAME]]
-    console.log('datalist delete', data, list, item)
+    let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let referenceObject = await this.getReferenceObject(item, dataList)
+    console.log('efw', referenceObject, dataList)
+    await this.deleteDataListItemFolder(collectionData, referenceObject)
+  },
+  
+  getReferenceObject: async function(item, dataList)
+  {
+    let referenceObject = dataList[this.DATA_LIST_LIST_FIELD_NAME][item[this.DATA_LIST_ID_FIELD_NAME]]
+    return referenceObject
+  },
+  
+  deleteDataListItemFolder: async function(collectionData, referenceObject)
+  {
+    let path = await this.getDataListItemDataFolderPath(collectionData, referenceObject)
+    await fs.rmSync(path, { recursive: true, force: true });
+  },
+  
+  deleteDataListItemFromDataList: async function(item, dataList)
+  {
+    console.log('fire', item, dataList)
+    let listData = dataList[this.DATA_LIST_LIST_FIELD_NAME]
+    await delete listData[item[this.DATA_LIST_ID_FIELD_NAME]]
+    console.log('datalist delete', dataList, listData, item)
   },
   
   getDataListIncomingItem: async function(collectionData)
   {
-    let item = collectionData[this.INCOMING_ITEM_FIELD_NAME][this.ITEM_DATA_FIELD_NAME]
+    let item = collectionData[this.INCOMING_ITEM_FIELD_NAME]
     return item
   },
   
   saveNewObjectToDataListDataFile: async function(newItem, collectionData)
   {
-    let data = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    let referenceObject = await this.addObjectToDataList(newItem, data)
+    let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let referenceObject = await this.addReferenceObjectToDataList(newItem, dataList)
+    await this.setIdToObjectItemData(newItem, dataList)
+    await this.increaseDataListAllTimeCountByOne(dataList)
     await this.saveDataListItemDataFile(collectionData, referenceObject, newItem)
-    await this.saveDataListDataFile(collectionData, data)
+    await this.saveDataListDataFile(collectionData, dataList)
+  },
+  
+  setIdToObjectItemData: async function(item, dataList)
+  {
+    let itemData = await this.getItemDataFromDataListItem(item)
+    itemData[this.DATA_LIST_ID_FIELD_NAME] = dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
   },
   
   saveDataListItemDataFile: async function(collectionData, referenceObject, newItem)
   {
-    await this.writeDataListItemDataFile(collectionData, referenceObject, newItem)
+    let itemData = await this.getItemDataFromDataListItem(newItem)
+    await this.writeDataListItemDataFile(collectionData, referenceObject, itemData)
   },
   
   saveDataListDataFile: async function(collectionData, data)
   {
     await this.writeJSONDataListDataFileFromCollectionData(collectionData, data)
+  },
+  
+  getItemDataFromDataListItem: async function(item)
+  {
+    let itemData = item[this.ITEM_DATA_FIELD_NAME]
+    return itemData
   },
   
   writeDataListItemDataFile: async function(collectionData, referenceObject, newItem)
@@ -169,6 +233,13 @@ module.exports = {
   {
     let path = await this.getDataListItemDataFilePath(collectionData, referenceObject)
     await this.writeJSONTextFile(path, newItem)
+  },
+  
+  readJSONDataListItemDataFile: async function(collectionData, referenceObject)
+  {
+    let path = await this.getDataListItemDataFilePath(collectionData, referenceObject)
+    let data = await this.readJSONDataFile(path)
+    return data
   },
   
   createDataListItemDataFolderIfNotExists: async function(collectionData, referenceObject)
@@ -202,17 +273,15 @@ module.exports = {
     return await JSON.parse(await JSON.stringify(object));
   },
   
-  async addObjectToDataList(object, data)
+  async addReferenceObjectToDataList(object, dataList)
   {
     let referenceObject = {
-      'id': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
-      'dataItemFolderName': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
-      'dataItemFileName': data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + '.txt'
+      'id': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
+      'dataItemFolderName': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
+      'dataItemFileName': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + '.txt'
     }
-    object[this.DATA_LIST_ID_FIELD_NAME] = data[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
-    let list = await data[this.DATA_LIST_LIST_FIELD_NAME]
-    list[object[this.DATA_LIST_ID_FIELD_NAME]] = referenceObject
-    await this.increaseDataListAllTimeCountByOne(data)
+    let list = await dataList[this.DATA_LIST_LIST_FIELD_NAME]
+    list[dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]] = referenceObject
     return referenceObject
   },
   

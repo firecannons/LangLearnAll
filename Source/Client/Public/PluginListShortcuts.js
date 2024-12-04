@@ -40,6 +40,7 @@ async function deepCopyObject(object)
 async function saveNewPlugin(newPlugin)
 {
   newPlugin = await saveNewDataListObject(newPlugin, PLUGIN_COLLETION_NAME)
+  console.log('new plugin', newPlugin)
   return newPlugin
 }
 
@@ -76,6 +77,7 @@ async function retrieveAndInsertPluginsToList(pluginListDiv)
 
 async function insertPluginsToList(plugins, pluginListDiv)
 {
+  console.log('pljugins', plugins)
   if(plugins != null)
   {
     for(let plugin of await Object.values(plugins[DATA_LIST_LIST_FIELD_NAME]))
@@ -94,10 +96,11 @@ async function retrieveAllPlugins()
 
 async function insertPluginToList(plugin, pluginListDiv)
 {
+  let pluginData = plugin[ITEM_DATA_FIELD_NAME]
   let listItemHolder = await addDiv(pluginListDiv)
   await addClassToElement(listItemHolder, 'pluginListItemHolder')
-  await addTextHoldingDiv(listItemHolder, 'Id: ' + plugin['id'])
-  await addTextHoldingDiv(listItemHolder, 'Name: ' + plugin['name'])
+  await addTextHoldingDiv(listItemHolder, 'Id: ' + pluginData['id'])
+  await addTextHoldingDiv(listItemHolder, 'Name: ' + pluginData['name'])
   await addActionsButtonsToPluginElement(listItemHolder, plugin)
 }
 
@@ -112,6 +115,7 @@ async function addActionsButtonsToPluginElement(listItemHolder, plugin)
 
 async function deletePlugin(plugin, listItemHolder)
 {
+  console.log('plugin', plugin)
   await sendDeletePluginMessage(plugin)
   await deletePluginElementFromList(listItemHolder)
 }

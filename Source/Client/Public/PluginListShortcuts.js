@@ -16,9 +16,7 @@ const CREATE_PLUGIN_DEFAULT_NAME = 'Unnamed Plugin'
 const ITEM_DATA_FIELD_NAME = 'itemData'
 
 const NEW_PLUGIN_DEFAULT_OBJECT = {
-  [ITEM_DATA_FIELD_NAME]: {
-    'name': CREATE_PLUGIN_DEFAULT_NAME
-  }
+  'name': CREATE_PLUGIN_DEFAULT_NAME
 }
 
 const PLUGIN_COLLETION_NAME = 'plugins'
@@ -96,11 +94,10 @@ async function retrieveAllPlugins()
 
 async function insertPluginToList(plugin, pluginListDiv)
 {
-  let pluginData = plugin[ITEM_DATA_FIELD_NAME]
   let listItemHolder = await addDiv(pluginListDiv)
   await addClassToElement(listItemHolder, 'pluginListItemHolder')
-  await addTextHoldingDiv(listItemHolder, 'Id: ' + pluginData['id'])
-  await addTextHoldingDiv(listItemHolder, 'Name: ' + pluginData['name'])
+  await addTextHoldingDiv(listItemHolder, 'Id: ' + plugin['id'])
+  await addTextHoldingDiv(listItemHolder, 'Name: ' + plugin['name'])
   await addActionsButtonsToPluginElement(listItemHolder, plugin)
 }
 

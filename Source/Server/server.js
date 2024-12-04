@@ -112,7 +112,7 @@ module.exports = {
     {
       let referenceObject = listDataItself[itemKey]
       let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
-      listDataItself[itemKey][this.ITEM_DATA_FIELD_NAME] = dataItem
+      listDataItself[itemKey] = dataItem
     }
     return dataList
   },
@@ -128,8 +128,7 @@ module.exports = {
     let collectionData = await this.getDataListCollectionFromInput(req.body)
     let item = await this.getDataListIncomingItem(req.body)
     await this.createDataListFileAndPathIfNotExist(collectionData)
-    await this.saveNewObjectToDataListDataFile(item, collectionData)
-    console.log('return item', item)
+    await this.saveNewObjectToDataList(item, collectionData)
     return res.json({[this.DEFAULT_RETURN_FIELD]: item})
   },
   
@@ -190,7 +189,7 @@ module.exports = {
     return item
   },
   
-  saveNewObjectToDataListDataFile: async function(newItem, collectionData)
+  saveNewObjectToDataList: async function(newItem, collectionData)
   {
     let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
     let referenceObject = await this.addReferenceObjectToDataList(newItem, dataList)
@@ -202,14 +201,12 @@ module.exports = {
   
   setIdToObjectItemData: async function(item, dataList)
   {
-    let itemData = await this.getItemDataFromDataListItem(item)
-    itemData[this.DATA_LIST_ID_FIELD_NAME] = dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
+    item[this.DATA_LIST_ID_FIELD_NAME] = dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
   },
   
   saveDataListItemDataFile: async function(collectionData, referenceObject, newItem)
   {
-    let itemData = await this.getItemDataFromDataListItem(newItem)
-    await this.writeDataListItemDataFile(collectionData, referenceObject, itemData)
+    await this.writeDataListItemDataFile(collectionData, referenceObject, newItem)
   },
   
   saveDataListDataFile: async function(collectionData, data)

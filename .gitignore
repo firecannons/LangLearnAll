@@ -4,3 +4,12 @@
 *files
 *.DS_Store*
 Data/
+Data/*
+Data*
+*Data
+*Data/
+*Data*
+*Data/*
+*/Data
+*/Data*
+*/Data/*

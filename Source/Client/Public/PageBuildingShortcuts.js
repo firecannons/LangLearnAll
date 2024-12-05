@@ -1,5 +1,7 @@
 // To be used in conjunction with PageBuildShortcuts.css
 
+const LINK_ELEMENT_TYPE = 'a'
+
 function addGenericTitle(holdingElement, text)
 {
   let titleDiv = addTextHoldingDiv(holdingElement, text)
@@ -11,6 +13,13 @@ function addGenericTitle(holdingElement, text)
 function addDiv(holdingElement)
 {
   let element = addElement(holdingElement, 'div')
+  return element
+}
+
+function addLink(holdingElement, url)
+{
+  let element = addElement(holdingElement, LINK_ELEMENT_TYPE)
+  element.href = url
   return element
 }
 

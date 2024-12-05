@@ -91,12 +91,19 @@ async function retrieveAllPlugins()
 }
 
 
+async function getPluginEditUrl(plugin)
+{
+  let url = '/plugin/' + plugin['id'] + '/edit'
+  return url
+}
+
 async function insertPluginToList(plugin, pluginListDiv)
 {
   let listItemHolder = await addDiv(pluginListDiv)
   await addClassToElement(listItemHolder, 'pluginListItemHolder')
-  await addTextHoldingDiv(listItemHolder, 'Id: ' + plugin['id'])
-  await addTextHoldingDiv(listItemHolder, 'Name: ' + plugin['name'])
+  let elementLink = await addLink(listItemHolder, await getPluginEditUrl(plugin))
+  await addTextHoldingDiv(elementLink, 'Id: ' + plugin['id'])
+  await addTextHoldingDiv(elementLink, 'Name: ' + plugin['name'])
   await addActionsButtonsToPluginElement(listItemHolder, plugin)
 }
 

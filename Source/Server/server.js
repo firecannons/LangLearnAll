@@ -25,7 +25,7 @@ module.exports = {
   DATA_LIST_LIST_FIELD_NAME: 'list',
   
   PATH_FROM_THIS_CODE_FILE_TO_REPO_BASE_LOCATION: '../../',
-  DATA_FOLDER_NAME: 'data',
+  DATA_FOLDER_NAME: 'Data',
   
   DATA_LISTS: {
     'plugins': {

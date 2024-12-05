@@ -75,7 +75,6 @@ async function retrieveAndInsertPluginsToList(pluginListDiv)
 
 async function insertPluginsToList(plugins, pluginListDiv)
 {
-  console.log('pljugins', plugins)
   if(plugins != null)
   {
     for(let plugin of await Object.values(plugins[DATA_LIST_LIST_FIELD_NAME]))
@@ -106,8 +105,23 @@ async function addActionsButtonsToPluginElement(listItemHolder, plugin)
   let actionButtonsHolder = await addDiv(listItemHolder)
   let deleteButton = await addGenericDeleteButton(actionButtonsHolder, 'Delete Plugin')
   await addClassToElement(actionButtonsHolder, 'pluginActionButtonsHolder')
-  await addReactionToElement(deleteButton, 'click', await deletePlugin.bind(null, plugin, listItemHolder))
+  await addReactionToElement(deleteButton, 'click', await deletePluginButtonClicked.bind(null, plugin, listItemHolder))
   
+}
+
+async function deletePluginButtonClicked(plugin, listItemHolder)
+{
+  let shouldDelete = await promptShouldDelete()
+  if(shouldDelete == true)
+  {
+    await deletePlugin(plugin, listItemHolder)
+  }
+}
+
+async function promptShouldDelete()
+{
+  let shouldDelete = await window.confirm("Do you really want to delete this plugin?")
+  return shouldDelete
 }
 
 async function deletePlugin(plugin, listItemHolder)

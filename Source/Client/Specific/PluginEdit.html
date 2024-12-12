@@ -1,0 +1,25 @@
+<html>
+</head>
+</head>
+<body>
+<script src="/Public/NetworkShortcuts.js"></script>
+<script src='/Public/PageBuildingShortcuts.js'></script>
+<link href="/Public/PageBuildingShortcuts.css" rel="stylesheet">
+<script src='/Public/DataListShortcuts.js'></script>
+<script src='/Public/PluginEditShortcuts.js'></script>
+<link href="/Public/PluginEditShortcuts.css" rel="stylesheet">
+<script>
+
+
+
+  async function createPage()
+  {
+    let holdingDiv = await addPageHoldingDiv()
+    await addGenericTitle(holdingDiv, 'Plugin Edit')
+    let pluginEditWidget = await addPluginEditWidget(holdingDiv)
+  }
+  
+  createPage()
+</script>
+</body>
+</html>

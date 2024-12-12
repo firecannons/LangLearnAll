@@ -16,6 +16,7 @@ module.exports = {
   
   SAVE_NEW_DATA_LIST_ITEM_PATH: 'saveNewDataListItem',
   DELETE_DATA_LIST_ITEM_PATH: 'deleteDataListItem',
+  RETRIEVE_COMPLETE_DATA_LIST_ITEM_PATH: 'retrieveCompleteDataListItem',
   
   
   DATA_LIST_FILE_START_OBJECT: {'allTimeCount': 0, 'list': {}},
@@ -40,6 +41,8 @@ module.exports = {
   
   ITEM_DATA_FIELD_NAME: 'itemData',
   
+  INCOMING_ID_FIELD_NAME: 'itemId',
+  
   
   
   createNewWebServer: async function()
@@ -57,11 +60,17 @@ module.exports = {
         res.sendFile( path.resolve( __dirname + '/../Client/Specific/Plugins.html' ) );
     })
     
+    app.get('/Plugin/:id/edit', function(req, res) {
+        res.sendFile( path.resolve( __dirname + '/../Client/Specific/PluginEdit.html' ) );
+    })
+    
     app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllDataListItems.bind(this))
     
     app.post('/' + this.SAVE_NEW_DATA_LIST_ITEM_PATH, await this.saveNewDataListItem.bind(this))
     
     app.post('/' + this.DELETE_DATA_LIST_ITEM_PATH, await this.deleteDataListItem.bind(this))
+    
+    app.post('/' + this.RETRIEVE_COMPLETE_DATA_LIST_ITEM_PATH, await this.retrieveCompleteDataListItem.bind(this))
   },
   
   appListen: async function(app)
@@ -197,6 +206,37 @@ module.exports = {
     await this.increaseDataListAllTimeCountByOne(dataList)
     await this.saveDataListItemDataFile(collectionData, referenceObject, newItem)
     await this.saveDataListDataFile(collectionData, dataList)
+  },
+  
+  retrieveCompleteDataListItem: async function(req, res)
+  {
+    let collectionData = await this.getDataListCollectionFromInput(req.body)
+    let itemId = await this.getDataListIncomingId(req.body)
+    let item = await this.getCompleteDataListItemFromId(collectionData, itemId)
+    return res.json({[this.DEFAULT_RETURN_FIELD]: item})
+  },
+  
+  getCompleteDataListItemFromId: async function(collectionData, itemId)
+  {
+    let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
+    let dataListWithItems = await this.extractCompleteDataListItem(collectionData, dataList, itemId)
+    return dataListWithItems
+  },
+  
+    
+  extractCompleteDataListItem: async function(collectionData, dataList, itemId)
+  {
+    let listDataItself = dataList[this.DATA_LIST_LIST_FIELD_NAME]
+    let referenceObject = listDataItself[itemId]
+    let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+    return dataItem
+  },
+  
+  
+  getDataListIncomingId: async function(collectionData)
+  {
+    let item = collectionData[this.INCOMING_ID_FIELD_NAME]
+    return item
   },
   
   setIdToObjectItemData: async function(item, dataList)

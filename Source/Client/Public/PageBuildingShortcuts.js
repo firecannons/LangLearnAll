@@ -76,6 +76,14 @@ function addGenericCreateButton(holdingElement, text)
   return genericCreateButton
 }
 
+function addGenericSaveButton(holdingElement, text)
+{
+  let buttonHolder = addDiv(holdingElement)
+  let button = addGenericButton(buttonHolder, text)
+  addClassToElement(button, 'saveButton')
+  return button
+}
+
 function addGenericDeleteButton(holdingElement, text)
 {
   let buttonHolder = addDiv(holdingElement)
@@ -84,3 +92,7 @@ function addGenericDeleteButton(holdingElement, text)
   return genericButton
 }
 
+async function deepCopyObject(object)
+{
+  return await JSON.parse(await JSON.stringify(object));
+}

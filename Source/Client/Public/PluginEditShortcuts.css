@@ -7,3 +7,16 @@
   margin: 5px;
   border-radius: 5px;
 }
+
+.saveButton
+{
+  padding: 5px;
+  font-family: sans-serif;
+  color: white;
+  background-color: #6699ff;
+}
+
+.codeGroupHolder
+{
+  padding: 10px;
+}

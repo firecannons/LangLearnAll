@@ -33,6 +33,11 @@
   background-color: #22bb33;
 }
 
+.saveButton
+{
+  background-color: #1188dd;
+}
+
 .deleteButton
 {
   background-color: #ff3333;

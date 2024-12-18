@@ -12,7 +12,7 @@ async function setAsTopLevelOfWidget(element)
   await setWidgetDataFromHolder(element, await deepCopyObject(WIDGET_DATA_DEFAULT))
 }
 
-async function getWidgetHolder(lowerElement)
+async function getWidgetHolderFromLowerElement(lowerElement)
 {
   let widgetHolder = await lowerElement.closest(await '.' + WIDGET_HOLDER_CLASS)
   return widgetHolder
@@ -20,7 +20,7 @@ async function getWidgetHolder(lowerElement)
 
 async function getWidgetDataFromElement(lowerElement)
 {
-  let widgetHolder = await getWidgetHolder(lowerElement)
+  let widgetHolder = await getWidgetHolderFromLowerElement(lowerElement)
   let widgetData = await getWidgetDataFromHolder(widgetHolder)
   return widgetData
 }
@@ -33,7 +33,7 @@ async function getWidgetDataFromHolder(widgetHolder)
 
 async function setWidgetDataFromElement(lowerElement, widgetData)
 {
-  let widgetHolder = await getWidgetHolder(lowerElement)
+  let widgetHolder = await getWidgetHolderFromLowerElement(lowerElement)
   await setWidgetDataFromHolder(widgetHolder, widgetData)
 }
 

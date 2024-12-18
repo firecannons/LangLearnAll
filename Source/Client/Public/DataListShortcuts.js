@@ -18,7 +18,21 @@ const COLLECTION_FIELD_NAME = 'collection'
 const INCOMING_ITEM_FIELD_NAME = 'item'
 const INCOMING_ITEM_ID_FIELD_NAME = 'itemId'
 
-async function saveNewDataListObject(object, collectionName)
+const FILE_FIELD_TYPE = 'File'
+const TEXT_FILE_FIELD_TYPE = 'Text'
+
+async function addTextFileFieldToDataListItem(plugin, text, fieldId)
+{
+  let fileObject = {
+    'fieldId': fieldId,
+    'fieldType': FILE_FIELD_TYPE,
+    'fieldSubType': TEXT_FILE_FIELD_TYPE,
+    'value': text
+  }
+  plugin[fieldId] = fileObject
+}
+
+async function saveDataListObject(object, collectionName)
 {
   let body = {[COLLECTION_FIELD_NAME]: collectionName, [INCOMING_ITEM_FIELD_NAME]: object}
   newPlugin = await fetchDataShortcut(SAVE_NEW_DATA_LIST_ITEM_PATH, body)

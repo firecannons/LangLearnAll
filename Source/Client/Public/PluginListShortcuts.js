@@ -37,7 +37,7 @@ async function deepCopyObject(object)
 
 async function saveNewPlugin(newPlugin)
 {
-  newPlugin = await saveNewDataListObject(newPlugin, PLUGIN_COLLETION_NAME)
+  newPlugin = await saveDataListObject(newPlugin, PLUGIN_COLLETION_NAME)
   console.log('new plugin', newPlugin)
   return newPlugin
 }

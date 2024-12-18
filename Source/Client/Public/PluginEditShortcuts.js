@@ -19,6 +19,8 @@ const PLUGIN_COLLETION_NAME = 'plugins'
 
 const SAVE_BUTTON_TEXT = 'Save'
 
+const CODE_TEXT_IDS = ['webBrowserCode', 'webServerCode']
+
 
 async function addPluginEditWidget(holdingDiv)
 {
@@ -133,26 +135,47 @@ async function setWidgetStateToUnsaved(codeElement)
 async function addCodeZone(itemHolder, plugin)
 {
   let codeZoneHolder = await addDiv(itemHolder)
-  await addCodeGroup(codeZoneHolder, 'Web Browser HTML/CSS/JS Code: ', 'webBrowserCode')
-  await addCodeGroup(codeZoneHolder, 'Web Server Node JS Code:', 'webServerCode')
-  await addWidgetSaveButton(codeZoneHolder)
+  await addCodeGroup(codeZoneHolder, 'Web Browser HTML/CSS/JS Code: ', CODE_TEXT_IDS[0])
+  await addCodeGroup(codeZoneHolder, 'Web Server Node JS Code:', CODE_TEXT_IDS[1])
+  await addWidgetSaveButton(codeZoneHolder, plugin)
 }
 
-async function addWidgetSaveButton(codeZoneHolder)
+async function addWidgetSaveButton(codeZoneHolder, plugin)
 {
   let button = await addGenericSaveButton(codeZoneHolder, SAVE_BUTTON_TEXT)
-  await addSaveButtonTrigger(button)
+  await addSaveButtonTrigger(button, plugin)
 }
 
-async function addSaveButtonTrigger(button)
+async function addSaveButtonTrigger(button, plugin)
 {
-  button.addEventListener('click', onSaveButtonClicked)
+  await button.addEventListener('click', await onSaveButtonClicked.bind(null, plugin))
 }
 
-async function onSaveButtonClicked(e)
+async function onSaveButtonClicked(plugin, e)
 {
   let codeElement = e.target
   await setWidgetStateToSaved(codeElement)
+  await saveCodeTexts(codeElement, plugin)
+}
+
+async function saveCodeTexts(codeElement, plugin)
+{
+  let widgetHolder = await getWidgetHolderFromLowerElement(codeElement)
+  await addCodeTextToPlugin(plugin, await getCodeFromCodeGroup(widgetHolder, CODE_TEXT_IDS[0]), CODE_TEXT_IDS[0])
+  await addCodeTextToPlugin(plugin, await getCodeFromCodeGroup(widgetHolder, CODE_TEXT_IDS[1]), CODE_TEXT_IDS[1])
+  await saveDataListObject(plugin, PLUGIN_COLLETION_NAME)
+}
+
+async function addCodeTextToPlugin(plugin, text, fieldId)
+{
+  await addTextFileFieldToDataListItem(plugin, text, fieldId)
+}
+
+async function getCodeFromCodeGroup(widgetHolder, codeId)
+{
+  let codeElement = widgetHolder.getElementsByClassName(codeId)
+  let codeText = codeElement.value
+  return codeText  
 }
 
 async function setWidgetStateToSaved(codeElement)

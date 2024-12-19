@@ -3,7 +3,7 @@
 
 
 const RETRIEVE_ALL_DATA_LIST_ITEMS_PATH = '/retrieveAllDataListItems'
-const SAVE_NEW_DATA_LIST_ITEM_PATH = '/saveNewDataListItem'
+const SAVE_DATA_LIST_ITEM_PATH = '/saveDataListItem'
 const DELETE_DATA_LIST_ITEM_PATH = '/deleteDataListItem'
 const RETRIEVE_COMPLETE_DATA_LIST_ITEM_PATH = '/retrieveCompleteDataListItem'
 
@@ -35,7 +35,7 @@ async function addTextFileFieldToDataListItem(plugin, text, fieldId)
 async function saveDataListObject(object, collectionName)
 {
   let body = {[COLLECTION_FIELD_NAME]: collectionName, [INCOMING_ITEM_FIELD_NAME]: object}
-  newPlugin = await fetchDataShortcut(SAVE_NEW_DATA_LIST_ITEM_PATH, body)
+  newPlugin = await fetchDataShortcut(SAVE_DATA_LIST_ITEM_PATH, body)
   return newPlugin
 }
 

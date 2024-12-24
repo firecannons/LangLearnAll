@@ -168,7 +168,7 @@ async function saveCodeTexts(codeElement, plugin)
 
 async function addCodeTextToPlugin(plugin, text, fieldId)
 {
-  await addTextFileFieldToDataListItem(plugin, text, fieldId)
+  await addTextFileFieldToDataListItem(fieldId, text, plugin)
 }
 
 async function getCodeFromCodeGroup(widgetHolder, codeId)

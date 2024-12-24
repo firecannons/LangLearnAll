@@ -11,20 +11,23 @@
 * */
 
 
-const CREATE_PLUGIN_DEFAULT_NAME = 'Unnamed Plugin'
+const PLUGIN_DEFAULT_NAME = 'Unnamed Plugin'
+const PLUGIN_NAME_FIELD_NAME = 'Name'
 
 const ITEM_DATA_FIELD_NAME = 'itemData'
 
 const NEW_PLUGIN_DEFAULT_OBJECT = {
-  'name': CREATE_PLUGIN_DEFAULT_NAME
 }
 
 const PLUGIN_COLLETION_NAME = 'plugins'
 
 
+
+
 async function createPlugin(pluginList)
 {
   let newPlugin = await deepCopyObject(NEW_PLUGIN_DEFAULT_OBJECT)
+  await addTextFieldToDataListItem(PLUGIN_NAME_FIELD_NAME, PLUGIN_DEFAULT_NAME, newPlugin)
   newPlugin = await saveNewPlugin(newPlugin)
   await insertPluginToList(newPlugin, pluginList)
 }
@@ -102,8 +105,8 @@ async function insertPluginToList(plugin, pluginListDiv)
   let listItemHolder = await addDiv(pluginListDiv)
   await addClassToElement(listItemHolder, 'pluginListItemHolder')
   let elementLink = await addLink(listItemHolder, await getPluginEditUrl(plugin))
-  await addTextHoldingDiv(elementLink, 'Id: ' + plugin['id'])
-  await addTextHoldingDiv(elementLink, 'Name: ' + plugin['name'])
+  await addTextHoldingDiv(elementLink, 'Id: ' + await getDataListItemFieldValue('id', plugin))
+  await addTextHoldingDiv(elementLink, 'Name: ' + await getDataListItemFieldValue(PLUGIN_NAME_FIELD_NAME, plugin))
   await addActionsButtonsToPluginElement(listItemHolder, plugin)
 }
 

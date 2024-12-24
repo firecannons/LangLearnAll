@@ -44,6 +44,10 @@ module.exports = {
   INCOMING_ID_FIELD_NAME: 'itemId',
   
   
+  TEXT_FIELD_TYPE: 'Text',
+
+  DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME: 'fieldValue',
+  
   
   createNewWebServer: async function()
   {
@@ -241,7 +245,25 @@ module.exports = {
   
   setIdToObjectItemData: async function(item, dataList)
   {
-    item[this.DATA_LIST_ID_FIELD_NAME] = dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]
+    let value = dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME].toString()
+    await this.addTextFieldToDataListItem(this.DATA_LIST_ID_FIELD_NAME, value, item)
+  },
+  
+  createDataListItemTextField: async function(fieldName, fieldValue)
+  {
+    let newDataOfItem = {
+      'fieldName': fieldName,
+      'fieldType': this.TEXT_FIELD_TYPE,
+      [this.DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
+    }
+    return newDataOfItem
+  },
+  
+  addTextFieldToDataListItem: async function(fieldName, fieldValue, object)
+  {
+    let newField = await this.createDataListItemTextField(fieldName, fieldValue)
+    object[fieldName] = newField
+    return object
   },
   
   saveDataListItemDataFile: async function(collectionData, referenceObject, newItem)
@@ -269,8 +291,8 @@ module.exports = {
   {
     console.log('ni', newItem, referenceObject)
     await this.createDataListItemDataFolderIfNotExists(collectionData, referenceObject)
+    await this.writeFileFields(collectionData, referenceObject, newItem)
     await this.writeJSONToDataListItemDataFile(collectionData, referenceObject, newItem)
-    await this.writeFileFields(collectionData, referenceObject)
   },
   
   writeJSONToDataListItemDataFile: async function(collectionData, referenceObject, newItem)

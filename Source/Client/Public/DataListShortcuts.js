@@ -18,19 +18,12 @@ const COLLECTION_FIELD_NAME = 'collection'
 const INCOMING_ITEM_FIELD_NAME = 'item'
 const INCOMING_ITEM_ID_FIELD_NAME = 'itemId'
 
-const FILE_FIELD_TYPE = 'File'
-const TEXT_FILE_FIELD_TYPE = 'Text'
+const TEXT_FILE_FIELD_TYPE = 'File(text)'
+const TEXT_FIELD_TYPE = 'Text'
 
-async function addTextFileFieldToDataListItem(plugin, text, fieldId)
-{
-  let fileObject = {
-    'fieldId': fieldId,
-    'fieldType': FILE_FIELD_TYPE,
-    'fieldSubType': TEXT_FILE_FIELD_TYPE,
-    'value': text
-  }
-  plugin[fieldId] = fileObject
-}
+const DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME = 'fieldValue'
+
+
 
 async function saveDataListObject(object, collectionName)
 {
@@ -62,3 +55,64 @@ async function retrieveCompleteDataListItem(collectionName, id)
   return plugins
 }
 
+async function createTextField(fieldName, fieldValue)
+{
+  let newDataOfItem = {
+    'fieldName': fieldName,
+    'fieldType': TEXT_FIELD_TYPE,
+    [DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
+  }
+  return newDataOfItem
+}
+
+async function createTextFileField(fieldName, fieldValue)
+{
+  let newDataOfItem = {
+    'fieldName': fieldName,
+    'fieldType': TEXT_FILE_FIELD_TYPE,
+    [DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
+  }
+  return newDataOfItem
+}
+
+async function addTextFieldToDataListItem(fieldName, fieldValue, object)
+{
+  let newField = await createTextField(fieldName, fieldValue)
+  object[fieldName] = newField
+  return object
+}
+
+async function addTextFileFieldToDataListItem(fieldName, fieldValue, object)
+{
+  let newField = await createTextFileField(fieldName, fieldValue)
+  object[fieldName] = newField
+  return object
+}
+
+
+
+
+async function getFieldObjectFromDataListItem(fieldName, object)
+{
+  let fieldObject = object[fieldName]
+  return fieldObject
+}
+
+async function getDataListItemFieldValue(fieldName, object)
+{
+  let value = null
+  let fieldObject = await getFieldObjectFromDataListItem(fieldName, object)
+  if(fieldObject != null)
+  {
+    value = await getFieldValueFromFieldObject(fieldObject)
+  }
+  console.log('object', value, fieldObject, fieldName, object)
+  return value
+}
+
+async function getFieldValueFromFieldObject(fieldObject)
+{
+  let value = fieldObject[DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]
+  console.log('tr', fieldObject, value)
+  return value
+}

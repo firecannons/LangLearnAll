@@ -14,6 +14,8 @@
 
 const WIDGET_IS_SAVED_FIELD = 'isSaved'
 
+const PLUGIN_NAME_FIELD_NAME = 'Name'
+
 
 const PLUGIN_COLLETION_NAME = 'plugins'
 
@@ -91,8 +93,8 @@ async function insertPluginToPage(holdingDiv, plugin)
 async function addTopZone(itemHolder, plugin)
 {
   let topZoneHolder = await addDiv(itemHolder)
-  await addTextHoldingDiv(topZoneHolder, 'Id: ' + plugin['id'])
-  await addTextHoldingDiv(topZoneHolder, 'Name: ' + plugin['name'])
+  await addTextHoldingDiv(topZoneHolder, 'Id: ' + await getDataListItemFieldValue('id', plugin))
+  await addTextHoldingDiv(topZoneHolder, 'Name: ' + await getDataListItemFieldValue(PLUGIN_NAME_FIELD_NAME, plugin))
 }
 
 async function addCodeGroup(codeZoneHolder, explanationText, codeElementClass)

@@ -96,7 +96,7 @@ async function retrieveAllPlugins()
 
 async function getPluginEditUrl(plugin)
 {
-  let url = '/plugin/' + plugin['id'] + '/edit'
+  let url = '/plugin/' + await getDataListItemFieldValue('id', plugin) + '/edit'
   return url
 }
 

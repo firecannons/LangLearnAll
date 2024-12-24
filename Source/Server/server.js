@@ -145,7 +145,6 @@ module.exports = {
   {
     let collectionData = await this.getDataListCollectionFromInput(req.body)
     let item = await this.getDataListIncomingItem(req.body)
-    console.log('ewf', item)
     await this.createDataListFileAndPathIfNotExist(collectionData)
     await this.saveObjectToDataList(item, collectionData)
     return res.json({[this.DEFAULT_RETURN_FIELD]: item})
@@ -211,10 +210,33 @@ module.exports = {
   {
     let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
     let referenceObject = await this.getOrAddReferenceObjectToDataList(item, dataList)
-    await this.setIdToObjectItemData(item, dataList)
-    await this.increaseDataListAllTimeCountByOne(dataList)
+    await this.possiblyAssignIdToDataListItemIfNoId(item, dataList)
     await this.saveDataListItemDataFile(collectionData, referenceObject, item)
     await this.saveDataListDataFile(collectionData, dataList)
+  },
+  
+  possiblyAssignIdToDataListItemIfNoId: async function(item, dataList)
+  {
+    if(await this.dataListItemFieldExists(item, this.DATA_LIST_ID_FIELD_NAME) == false)
+    {
+      await this.assignIdToDataListItem(item, dataList)
+    }
+  },
+  
+  assignIdToDataListItem: async function(item, dataList)
+  {
+    await this.setIdToObjectItemData(item, dataList)
+    await this.increaseDataListAllTimeCountByOne(dataList)
+  },
+  
+  dataListItemFieldExists: async function(item, fieldName)
+  {
+    let output = false
+    if(item[fieldName] != null)
+    {
+      output = true
+    }
+    return output
   },
   
   retrieveCompleteDataListItem: async function(req, res)
@@ -299,10 +321,8 @@ module.exports = {
   
   possiblyWriteDataItemFieldFileIfFieldIsFile: async function(collectionData, referenceObject, fieldObject)
   {
-    console.log('in', await this.getFieldTypeFromFieldObject(fieldObject), this.TEXT_FILE_FIELD_TYPE)
     if(await this.getFieldTypeFromFieldObject(fieldObject) == this.TEXT_FILE_FIELD_TYPE)
     {
-      console.log('ef')
       await this.writeDataItemFieldFile(collectionData, referenceObject, fieldObject)
     }
   },
@@ -349,10 +369,10 @@ module.exports = {
   getDataListItemFieldValue: async function(fieldName, object)
   {
     let value = null
-    let fieldObject = await getFieldObjectFromDataListItem(fieldName, object)
+    let fieldObject = await this.getFieldObjectFromDataListItem(fieldName, object)
     if(fieldObject != null)
     {
-      value = await getFieldValueFromFieldObject(fieldObject)
+      value = await this.getFieldValueFromFieldObject(fieldObject)
     }
     return value
   },
@@ -369,7 +389,7 @@ module.exports = {
     let fieldObject = await this.getFieldObjectFromDataListItem(fieldName, object)
     if(fieldObject != null)
     {
-      value = await getFieldTypeFromFieldObject(fieldObject)
+      value = await this.getFieldTypeFromFieldObject(fieldObject)
     }
     return value
   },
@@ -386,7 +406,7 @@ module.exports = {
     let fieldObject = await this.getFieldObjectFromDataListItem(fieldName, object)
     if(fieldObject != null)
     {
-      value = await getFieldNameFromFieldObject(fieldObject)
+      value = await this.getFieldNameFromFieldObject(fieldObject)
     }
     return value
   },
@@ -450,15 +470,41 @@ module.exports = {
     return await JSON.parse(await JSON.stringify(object));
   },
   
-  async getOrAddReferenceObjectToDataList(object, dataList)
+  getOrAddReferenceObjectToDataList: async function(object, dataList)
   {
-    let referenceObject = {
-      'id': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
-      'dataItemFolderName': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME],
-      'dataItemFileName': dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME] + '.txt'
+    let referenceObject = null
+    if(await this.dataListItemFieldExists(object, this.DATA_LIST_ID_FIELD_NAME) == true)
+    {
+      referenceObject = await this.getReferenceObjectToDataList(object, dataList)
     }
+    else
+    {
+      referenceObject = await this.addReferenceObjectToDataList(object, dataList)
+    }
+    return referenceObject
+  },
+  
+  addReferenceObjectToDataList: async function(object, dataList)
+  {
+    let referenceObject = this.createReferenceObjectFromId(dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME])
     let list = await dataList[this.DATA_LIST_LIST_FIELD_NAME]
     list[dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]] = referenceObject
+    return referenceObject
+  },
+  
+  getReferenceObjectToDataList: async function(object, dataList)
+  {
+    let referenceObject = this.createReferenceObjectFromId(await this.getDataListItemFieldValue(this.DATA_LIST_ID_FIELD_NAME, object))
+    return referenceObject
+  },
+  
+  createReferenceObjectFromId: async function(id)
+  {
+    let referenceObject = {
+      'id': id,
+      'dataItemFolderName': id,
+      'dataItemFileName': id + '.txt'
+    }
     return referenceObject
   },
   

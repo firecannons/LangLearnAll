@@ -165,6 +165,7 @@ async function saveCodeTexts(codeElement, plugin)
   let widgetHolder = await getWidgetHolderFromLowerElement(codeElement)
   await addCodeTextToPlugin(plugin, await getCodeFromCodeGroup(widgetHolder, CODE_TEXT_IDS[0]), CODE_TEXT_IDS[0])
   await addCodeTextToPlugin(plugin, await getCodeFromCodeGroup(widgetHolder, CODE_TEXT_IDS[1]), CODE_TEXT_IDS[1])
+  console.log('plugin is', plugin)
   await saveDataListObject(plugin, PLUGIN_COLLETION_NAME)
 }
 
@@ -175,7 +176,7 @@ async function addCodeTextToPlugin(plugin, text, fieldId)
 
 async function getCodeFromCodeGroup(widgetHolder, codeId)
 {
-  let codeElement = widgetHolder.getElementsByClassName(codeId)
+  let codeElement = widgetHolder.getElementsByClassName(codeId)[0]
   let codeText = codeElement.value
   return codeText  
 }

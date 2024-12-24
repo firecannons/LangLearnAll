@@ -22,6 +22,8 @@ const TEXT_FILE_FIELD_TYPE = 'File(text)'
 const TEXT_FIELD_TYPE = 'Text'
 
 const DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME = 'fieldValue'
+const DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME = 'fieldType'
+const DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME = 'fieldName'
 
 
 
@@ -58,8 +60,8 @@ async function retrieveCompleteDataListItem(collectionName, id)
 async function createTextField(fieldName, fieldValue)
 {
   let newDataOfItem = {
-    'fieldName': fieldName,
-    'fieldType': TEXT_FIELD_TYPE,
+    [DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME]: fieldName,
+    [DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME]: TEXT_FIELD_TYPE,
     [DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
   }
   return newDataOfItem
@@ -68,8 +70,8 @@ async function createTextField(fieldName, fieldValue)
 async function createTextFileField(fieldName, fieldValue)
 {
   let newDataOfItem = {
-    'fieldName': fieldName,
-    'fieldType': TEXT_FILE_FIELD_TYPE,
+    [DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME]: fieldName,
+    [DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME]: TEXT_FILE_FIELD_TYPE,
     [DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
   }
   return newDataOfItem
@@ -114,5 +116,22 @@ async function getFieldValueFromFieldObject(fieldObject)
 {
   let value = fieldObject[DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]
   console.log('tr', fieldObject, value)
+  return value
+}
+
+async function getDataListItemFieldType(fieldName, object)
+{
+  let value = null
+  let fieldObject = await getFieldObjectFromDataListItem(fieldName, object)
+  if(fieldObject != null)
+  {
+    value = await getFieldValueFromFieldObject(fieldObject)
+  }
+  return value
+}
+
+async function getFieldTypeFromFieldObject(fieldObject)
+{
+  let value = fieldObject[DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME]
   return value
 }

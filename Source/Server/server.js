@@ -44,9 +44,14 @@ module.exports = {
   INCOMING_ID_FIELD_NAME: 'itemId',
   
   
+  TEXT_FILE_FIELD_TYPE: 'File(text)',
   TEXT_FIELD_TYPE: 'Text',
 
   DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME: 'fieldValue',
+  DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME: 'fieldType',
+  DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME: 'fieldName',
+  
+  DATA_LIST_ITEM_FILE_FIELDS_FOLDER_PATH: 'fieldFiles',
   
   
   createNewWebServer: async function()
@@ -202,13 +207,13 @@ module.exports = {
     return item
   },
   
-  saveObjectToDataList: async function(newItem, collectionData)
+  saveObjectToDataList: async function(item, collectionData)
   {
     let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    let referenceObject = await this.getOrAddReferenceObjectToDataList(newItem, dataList)
-    await this.setIdToObjectItemData(newItem, dataList)
+    let referenceObject = await this.getOrAddReferenceObjectToDataList(item, dataList)
+    await this.setIdToObjectItemData(item, dataList)
     await this.increaseDataListAllTimeCountByOne(dataList)
-    await this.saveDataListItemDataFile(collectionData, referenceObject, newItem)
+    await this.saveDataListItemDataFile(collectionData, referenceObject, item)
     await this.saveDataListDataFile(collectionData, dataList)
   },
   
@@ -252,8 +257,8 @@ module.exports = {
   createDataListItemTextField: async function(fieldName, fieldValue)
   {
     let newDataOfItem = {
-      'fieldName': fieldName,
-      'fieldType': this.TEXT_FIELD_TYPE,
+      [this.DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME]: fieldName,
+      [this.DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME]: this.TEXT_FIELD_TYPE,
       [this.DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]: fieldValue
     }
     return newDataOfItem
@@ -266,9 +271,9 @@ module.exports = {
     return object
   },
   
-  saveDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  saveDataListItemDataFile: async function(collectionData, referenceObject, item)
   {
-    await this.writeDataListItemDataFile(collectionData, referenceObject, newItem)
+    await this.writeDataListItemDataFile(collectionData, referenceObject, item)
   },
   
   saveDataListDataFile: async function(collectionData, data)
@@ -282,24 +287,129 @@ module.exports = {
     return itemData
   },
   
-  writeFileFields: async function(collectionData, referenceObject)
+  writeFileFields: async function(collectionData, referenceObject, item)
   {
-    
+    let itemKeys = await Object.keys(item)
+    for(let itemKey of itemKeys)
+    {
+      let fieldObject = item[itemKey]
+      await this.possiblyWriteDataItemFieldFileIfFieldIsFile(collectionData, referenceObject, fieldObject)
+    }
   },
   
-  writeDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  possiblyWriteDataItemFieldFileIfFieldIsFile: async function(collectionData, referenceObject, fieldObject)
   {
-    console.log('ni', newItem, referenceObject)
+    console.log('in', await this.getFieldTypeFromFieldObject(fieldObject), this.TEXT_FILE_FIELD_TYPE)
+    if(await this.getFieldTypeFromFieldObject(fieldObject) == this.TEXT_FILE_FIELD_TYPE)
+    {
+      console.log('ef')
+      await this.writeDataItemFieldFile(collectionData, referenceObject, fieldObject)
+    }
+  },
+  
+  writeDataItemFieldFile: async function(collectionData, referenceObject, fieldObject)
+  {
+    let filePath = await this.getDataItemFileFieldFilePath(collectionData, referenceObject, fieldObject)
+    let value = await this.getFieldValueFromFieldObject(fieldObject)
+    console.log('writing text file field', filePath, value, fieldObject)
+    await this.writeAndPossiblyCreatePathToRawTextFile(filePath, value)
+  },
+  
+  writeAndPossiblyCreatePathToRawTextFile: async function(filePath, value)
+  {
+    await this.createFolderOfFilePathIfNotExist(filePath)
+    await this.writeRawTextFile(filePath, value)
+  },
+  
+  getFileNameForDataListFieldFile: async function(fieldObject)
+  {
+    let filePath = await this.getFieldNameFromFieldObject(fieldObject) + '.txt'
+    return filePath
+  },
+  
+  getDataItemFileFieldFilePath: async function(collectionData, referenceObject, fieldObject)
+  {
+    let filePath = await this.getFileNameForDataListFieldFile(fieldObject)
+    let p = await path.join(await this.getDataItemFileFieldFolderPath(collectionData, referenceObject, fieldObject), filePath)
+    return p
+  },
+  
+  getDataItemFileFieldFolderPath: async function(collectionData, referenceObject, fieldObject)
+  {
+    let p = await path.join(await this.getDataListItemDataFolderPath(collectionData, referenceObject), this.DATA_LIST_ITEM_FILE_FIELDS_FOLDER_PATH)
+    return p
+  },
+  
+  getFieldObjectFromDataListItem: async function(fieldName, object)
+  {
+    let fieldObject = object[fieldName]
+    return fieldObject
+  },
+
+  getDataListItemFieldValue: async function(fieldName, object)
+  {
+    let value = null
+    let fieldObject = await getFieldObjectFromDataListItem(fieldName, object)
+    if(fieldObject != null)
+    {
+      value = await getFieldValueFromFieldObject(fieldObject)
+    }
+    return value
+  },
+
+  getFieldValueFromFieldObject: async function(fieldObject)
+  {
+    let value = fieldObject[this.DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME]
+    return value
+  },
+
+  getDataListItemFieldType: async function(fieldName, object)
+  {
+    let value = null
+    let fieldObject = await this.getFieldObjectFromDataListItem(fieldName, object)
+    if(fieldObject != null)
+    {
+      value = await getFieldTypeFromFieldObject(fieldObject)
+    }
+    return value
+  },
+
+  getFieldTypeFromFieldObject: async function(fieldObject)
+  {
+    let value = fieldObject[this.DATA_LIST_ITEM_FIELD_TYPE_FIELD_NAME]
+    return value
+  },
+  
+  getDataListItemFieldName: async function(fieldName, object)
+  {
+    let value = null
+    let fieldObject = await this.getFieldObjectFromDataListItem(fieldName, object)
+    if(fieldObject != null)
+    {
+      value = await getFieldNameFromFieldObject(fieldObject)
+    }
+    return value
+  },
+
+  getFieldNameFromFieldObject: async function(fieldObject)
+  {
+    let value = fieldObject[this.DATA_LIST_ITEM_FIELD_NAME_FIELD_NAME]
+    return value
+  },
+  
+  writeDataListItemDataFile: async function(collectionData, referenceObject, item)
+  {
+    console.log('ni', item, referenceObject)
     await this.createDataListItemDataFolderIfNotExists(collectionData, referenceObject)
-    await this.writeFileFields(collectionData, referenceObject, newItem)
-    await this.writeJSONToDataListItemDataFile(collectionData, referenceObject, newItem)
+    await this.writeFileFields(collectionData, referenceObject, item)
+    await this.writeJSONToDataListItemDataFile(collectionData, referenceObject, item)
   },
   
-  writeJSONToDataListItemDataFile: async function(collectionData, referenceObject, newItem)
+  writeJSONToDataListItemDataFile: async function(collectionData, referenceObject, item)
   {
     let path = await this.getDataListItemDataFilePath(collectionData, referenceObject)
-    console.log('writing data list item to path', path, newItem)
-    await this.writeJSONTextFile(path, newItem)
+    console.log('writing data list item to path', path, item)
+    await this.writeJSONTextFile(path, item)
   },
   
   readJSONDataListItemDataFile: async function(collectionData, referenceObject)
@@ -394,10 +504,10 @@ module.exports = {
   
   writeJSONTextFile: async function(path, inputJSON)
   {
-    await this.writeDataFile(path, await JSON.stringify(inputJSON, null, 2))
+    await this.writeRawTextFile(path, await JSON.stringify(inputJSON, null, 2))
   },
       
-  async writeDataFile(path, inputText)
+  writeRawTextFile: async function(path, inputText)
   {
     await fs.writeFileSync(path, inputText)
   },
@@ -464,6 +574,12 @@ module.exports = {
   {
     let p = await path.join(await this.getDataListFolderPath(collectionData), collectionData['dataFileName'])
     return p
+  },
+  
+  createFolderOfFilePathIfNotExist: async function(filePath)
+  {
+    let folderPath = await path.dirname(filePath)
+    await this.createFolderIfNotExist(folderPath)
   },
   
   createFolderIfNotExist: async function(path)

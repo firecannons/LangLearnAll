@@ -21,8 +21,8 @@ async function addTopBar(holdingDiv)
 
 async function addLinksToTopBar(topBarHolder)
 {
-  await addTopBarLink(topBarHolder, 'Run', '/run')
-  await addTopBarLink(topBarHolder, 'All Plugins', '/plugins')
+  await addTopBarLink(topBarHolder, 'Run', '/Run')
+  await addTopBarLink(topBarHolder, 'All Plugins', '/Plugins')
 }
 
 async function addTopBarLink(topBarHolder, linkText, linkLocation)

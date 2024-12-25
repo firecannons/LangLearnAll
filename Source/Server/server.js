@@ -53,6 +53,12 @@ module.exports = {
   
   DATA_LIST_ITEM_FILE_FIELDS_FOLDER_PATH: 'fieldFiles',
   
+  RUN_PAGE_TEXT_TO_REPLACE: '<!--%-->',
+  RUN_PAGE_DATA_LIST_MAIN_TYPE: 'plugins',
+  
+  
+  CODE_TEXT_IDS: ['webBrowserCode', 'webServerCode'],
+  
   
   createNewWebServer: async function()
   {
@@ -71,6 +77,12 @@ module.exports = {
     
     app.get('/Plugin/:id/edit', function(req, res) {
         res.sendFile( path.resolve( __dirname + '/../Client/Specific/PluginEdit.html' ) );
+    })
+    
+    app.get('/Run', await this.generateAndSendRunPageHtmlCode.bind(this))
+    
+    app.get('/', function (req, res) {
+       res.redirect('/Run')
     })
     
     app.post('/' + this.RETRIEVE_ALL_DATA_LIST_ITEMS_PATH, await this.lookupAllDataListItems.bind(this))
@@ -107,6 +119,47 @@ module.exports = {
     await this.appListen(app)
   },
   
+  generateAndSendRunPageHtmlCode: async function(req, res)
+  {
+    let html = await this.generateRunPageHtmlCode(req, res)
+    await res.set('Content-Type', 'text/html');
+    await res.send(Buffer.from(html));
+  },
+  
+  generateRunPageHtmlCode: async function(req, res)
+  {
+    let runPageHtmlCodeBase = await this.readRawTextFile('/../Client/Specific/Run.html')
+    let pluginCode = await this.generateRunPagePluginCode()
+    let runPageGeneratedHtmlCode = await runPageHtmlCodeBase.replace(this.RUN_PAGE_TEXT_TO_REPLACE, pluginCode)
+    return runPageGeneratedHtmlCode
+  },
+  
+  generateRunPagePluginCode: async function()
+  {
+    let collectionData = await this.getDataListCollectionFromColletionFieldName(this.RUN_PAGE_DATA_LIST_MAIN_TYPE)
+    let dataList = await this.getAllDataListItems(collectionData)
+    let generatedPluginCode = await this.getAllGeneratedPluginCode(collectionData, dataList)
+  },
+  
+  getAllGeneratedPluginCode: async function(collectionData, dataList)
+  {
+    let allCode = ''
+    let listDataItself = dataList[this.DATA_LIST_LIST_FIELD_NAME]
+    let dataListKeys = await Object.keys(listDataItself)
+    for(let itemKey of dataListKeys)
+    {
+      let dataItem = listDataItself[itemKey]
+      let referenceObject = await this.getReferenceObject(dataItem, dataList)
+      console.log('getting code' , collectionData, referenceObject, dataItem, dataList)
+      completeDataItem = await this.readFileFields(collectionData, referenceObject, dataItem)
+      let code = await this.getDataListItemFieldValue(this.CODE_TEXT_IDS[0], completeDataItem)
+      allCode = code + '\n'
+    }
+    return dataList
+  },
+  
+  
+  
   lookupAllDataListItems: async function(req, res)
   {
     let collectionData = await this.getDataListCollectionFromInput(req.body)
@@ -129,8 +182,8 @@ module.exports = {
     for(let itemKey of dataListKeys)
     {
       let referenceObject = listDataItself[itemKey]
-      console.log('reading data items', collectionData, referenceObject)
       let dataItem = await this.getShallowDataListItem(collectionData, referenceObject)
+      console.log('reading object correft', referenceObject, dataItem)
       listDataItself[itemKey] = dataItem
     }
     return dataList
@@ -144,7 +197,13 @@ module.exports = {
   
   getDataListCollectionFromInput: async function(dataListSpecifierObject)
   {
-    let collectionData = this.DATA_LISTS[dataListSpecifierObject[this.COLLECTION_FIELD_NAME]]
+    let collectionData = await this.getDataListCollectionFromColletionFieldName(dataListSpecifierObject[this.COLLECTION_FIELD_NAME])
+    return collectionData
+  },
+  
+  getDataListCollectionFromColletionFieldName: async function(colletionFieldName)
+  {
+    let collectionData = this.DATA_LISTS[colletionFieldName]
     return collectionData
   },
   
@@ -550,10 +609,11 @@ module.exports = {
   
   createReferenceObjectFromId: async function(id)
   {
+    let textId = await id.toString()
     let referenceObject = {
-      'id': await id.toString(),
-      'dataItemFolderName': await id.toString(),
-      'dataItemFileName': await id.toString + '.txt'
+      'id': textId,
+      'dataItemFolderName': textId,
+      'dataItemFileName': textId + '.txt'
     }
     return referenceObject
   },

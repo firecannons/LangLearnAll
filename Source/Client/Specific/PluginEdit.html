@@ -6,9 +6,11 @@
 <script src='/Public/PageBuildingShortcuts.js'></script>
 <link href="/Public/PageBuildingShortcuts.css" rel="stylesheet">
 <script src='/Public/DataListShortcuts.js'></script>
-<link href="/Public/PluginEditShortcuts.css" rel="stylesheet">
 <script src='/Public/PluginEditShortcuts.js'></script>
+<link href="/Public/PluginEditShortcuts.css" rel="stylesheet">
 <script src='/Public/WidgetShortcuts.js'></script>
+<link href="/Public/TopBarShortcuts.css" rel="stylesheet">
+<script src='/Public/TopBarShortcuts.js'></script>
 <script>
 
 
@@ -16,8 +18,11 @@
   async function createPage()
   {
     let holdingDiv = await addPageHoldingDiv()
-    await addGenericTitle(holdingDiv, 'Plugin Edit')
-    let pluginEditWidget = await addPluginEditWidget(holdingDiv)
+    let topBar = await addTopBar(holdingDiv)
+    
+    let bodyHoldingDiv = await addDiv(holdingDiv)
+    await addGenericTitle(bodyHoldingDiv, 'Plugin Edit')
+    let pluginEditWidget = await addPluginEditWidget(bodyHoldingDiv)
   }
   
   createPage()

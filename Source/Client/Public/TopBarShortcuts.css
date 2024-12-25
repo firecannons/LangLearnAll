@@ -1,0 +1,33 @@
+/* To be used in conjunction with TopBarShortcuts.js */
+
+.topBarHolder
+{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+  gap: 50px;
+  color: #222222;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #eeeeee;
+  box-shadow: 0px 5px 5px #aaaaaa;
+  width: 100%;
+  font-size: 25px;
+  margin-bottom: 20px;
+  margin: 0px;
+}
+
+.topBarLink
+{
+  
+  color: #222222;
+  text-decoration: none;
+}
+
+body
+{
+  margin: 0;
+  padding: 0;
+}

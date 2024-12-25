@@ -129,10 +129,17 @@ module.exports = {
     for(let itemKey of dataListKeys)
     {
       let referenceObject = listDataItself[itemKey]
-      let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+      console.log('reading data items', collectionData, referenceObject)
+      let dataItem = await this.getShallowDataListItem(collectionData, referenceObject)
       listDataItself[itemKey] = dataItem
     }
     return dataList
+  },
+  
+  getShallowDataListItem: async function(collectionData, referenceObject)
+  {
+    let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+    return dataItem
   },
   
   getDataListCollectionFromInput: async function(dataListSpecifierObject)
@@ -259,8 +266,50 @@ module.exports = {
   {
     let listDataItself = dataList[this.DATA_LIST_LIST_FIELD_NAME]
     let referenceObject = listDataItself[itemId]
-    let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+    let dataItem = await this.collectCompleteDataListItem(collectionData, referenceObject)
     return dataItem
+  },
+  
+  collectCompleteDataListItem: async function(collectionData, referenceObject)
+  {
+    let dataItem = await this.readJSONDataListItemDataFile(collectionData, referenceObject)
+    dataItem = await this.readFileFields(collectionData, referenceObject, dataItem)
+    console.log('dataItem', dataItem)
+    return dataItem
+  },
+  
+  readFileFields: async function(collectionData, referenceObject, item)
+  {
+    let itemKeys = await Object.keys(item)
+    for(let itemKey of itemKeys)
+    {
+      let fieldObject = item[itemKey]
+      item[itemKey] = await this.possiblyReadDataItemFieldFileIfFieldIsFile(collectionData, referenceObject, fieldObject)
+    }
+    return item
+  },
+  
+  possiblyReadDataItemFieldFileIfFieldIsFile: async function(collectionData, referenceObject, fieldObject)
+  {
+    if(await this.getFieldTypeFromFieldObject(fieldObject) == this.TEXT_FILE_FIELD_TYPE)
+    {
+      fieldObject = await this.readDataItemFieldFile(collectionData, referenceObject, fieldObject)
+    }
+    return fieldObject
+  },
+  
+  readDataItemFieldFile: async function(collectionData, referenceObject, fieldObject)
+  {
+    let filePath = await this.getDataItemFileFieldFilePath(collectionData, referenceObject, fieldObject)
+    let value = await this.readRawTextFile(filePath)
+    fieldObject = await this.setFieldValueFromFieldObject(fieldObject, value)
+    return fieldObject
+  },
+  
+  setFieldValueFromFieldObject: async function(fieldObject, value)
+  {
+    fieldObject[this.DATA_LIST_ITEM_FIELD_VALUE_FIELD_NAME] = value
+    return fieldObject
   },
   
   
@@ -481,12 +530,13 @@ module.exports = {
     {
       referenceObject = await this.addReferenceObjectToDataList(object, dataList)
     }
+    console.log(dataList,' rerenceitem')
     return referenceObject
   },
   
   addReferenceObjectToDataList: async function(object, dataList)
   {
-    let referenceObject = this.createReferenceObjectFromId(dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME])
+    let referenceObject = await this.createReferenceObjectFromId(dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME])
     let list = await dataList[this.DATA_LIST_LIST_FIELD_NAME]
     list[dataList[this.DATA_LIST_ALL_TIME_COUNT_FIELD_NAME]] = referenceObject
     return referenceObject
@@ -494,16 +544,16 @@ module.exports = {
   
   getReferenceObjectToDataList: async function(object, dataList)
   {
-    let referenceObject = this.createReferenceObjectFromId(await this.getDataListItemFieldValue(this.DATA_LIST_ID_FIELD_NAME, object))
+    let referenceObject = await this.createReferenceObjectFromId(await this.getDataListItemFieldValue(this.DATA_LIST_ID_FIELD_NAME, object))
     return referenceObject
   },
   
   createReferenceObjectFromId: async function(id)
   {
     let referenceObject = {
-      'id': id,
-      'dataItemFolderName': id,
-      'dataItemFileName': id + '.txt'
+      'id': await id.toString(),
+      'dataItemFolderName': await id.toString(),
+      'dataItemFileName': await id.toString + '.txt'
     }
     return referenceObject
   },
@@ -560,12 +610,12 @@ module.exports = {
   
   async readJSONDataFile(path)
   {
-    let text = await this.readDataFile(path)
+    let text = await this.readRawTextFile(path)
     let o = await JSON.parse(text)
     return o
   },
   
-  async readDataFile(path)
+  async readRawTextFile(path)
   {
     let data = null
     try

@@ -139,7 +139,17 @@ async function addCodeZone(itemHolder, plugin)
   let codeZoneHolder = await addDiv(itemHolder)
   await addCodeGroup(codeZoneHolder, 'Web Browser HTML/CSS/JS Code: ', CODE_TEXT_IDS[0])
   await addCodeGroup(codeZoneHolder, 'Web Server Node JS Code:', CODE_TEXT_IDS[1])
+  await setCodeGroupCodeText(codeZoneHolder, plugin, CODE_TEXT_IDS[0], CODE_TEXT_IDS[0])
+  await setCodeGroupCodeText(codeZoneHolder, plugin, CODE_TEXT_IDS[1], CODE_TEXT_IDS[1])
   await addWidgetSaveButton(codeZoneHolder, plugin)
+}
+
+async function setCodeGroupCodeText(codeZoneHolder, plugin, fieldName, codeElementClass)
+{
+  let value = await getDataListItemFieldValue(fieldName, plugin)
+  let element = await codeZoneHolder.getElementsByClassName(codeElementClass)[0]
+  element.value = value
+  return value
 }
 
 async function addWidgetSaveButton(codeZoneHolder, plugin)

@@ -9,11 +9,20 @@
 <script src='/Public/WidgetShortcuts.js'></script>
 <link href="/Public/TopBarShortcuts.css" rel="stylesheet">
 <script src='/Public/TopBarShortcuts.js'></script>
-<script>
+
+
+
+
+
 
 <!--%-->
 
 
+
+
+
+
+<script>
 
 
 
@@ -25,6 +34,7 @@
     
     let bodyHoldingDiv = await addDiv(holdingDiv)
     await addGenericTitle(bodyHoldingDiv, 'Run')
+    await addClassToElement(bodyHoldingDiv, 'runBodyHoldingElement')
   }
   
   createPage()

@@ -128,7 +128,7 @@ module.exports = {
   
   generateRunPageHtmlCode: async function(req, res)
   {
-    let runPageHtmlCodeBase = await this.readRawTextFile('/../Client/Specific/Run.html')
+    let runPageHtmlCodeBase = await this.readRawTextFile(await this.getRunHtmlFilePath())
     let pluginCode = await this.generateRunPagePluginCode()
     let runPageGeneratedHtmlCode = await runPageHtmlCodeBase.replace(this.RUN_PAGE_TEXT_TO_REPLACE, pluginCode)
     return runPageGeneratedHtmlCode
@@ -149,7 +149,7 @@ module.exports = {
     for(let itemKey of dataListKeys)
     {
       let dataItem = listDataItself[itemKey]
-      let referenceObject = await this.getReferenceObject(dataItem, dataList)
+      let referenceObject = await this.generateReferenceObjectToDataList(dataItem)
       console.log('getting code' , collectionData, referenceObject, dataItem, dataList)
       completeDataItem = await this.readFileFields(collectionData, referenceObject, dataItem)
       let code = await this.getDataListItemFieldValue(this.CODE_TEXT_IDS[0], completeDataItem)
@@ -158,6 +158,12 @@ module.exports = {
     return dataList
   },
   
+  
+  getRunHtmlFilePath: async function()
+  {
+    let p = await path.join(await this.getThisCodeFilePath(), '/../Client/Specific/Run.html')
+    return p
+  },
   
   
   lookupAllDataListItems: async function(req, res)
@@ -234,7 +240,7 @@ module.exports = {
   deleteItemFromDataListDataFile: async function(item, collectionData)
   {
     let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    let referenceObject = await this.getReferenceObject(item, dataList)
+    let referenceObject = await this.getReferenceObjectFromDataList(item, dataList)
     await this.deleteDataListItemFromDataList(item, dataList)
     await this.writeJSONDataListDataFileFromCollectionData(collectionData, dataList)
   },
@@ -242,11 +248,11 @@ module.exports = {
   deleteItemSelfDataFile: async function(item, collectionData)
   {
     let dataList = await this.readJSONDataListDataFileFromCollectionData(collectionData)
-    let referenceObject = await this.getReferenceObject(item, dataList)
+    let referenceObject = await this.getReferenceObjectFromDataList(item, dataList)
     await this.deleteDataListItemFolder(collectionData, referenceObject)
   },
   
-  getReferenceObject: async function(item, dataList)
+  getReferenceObjectFromDataList: async function(item, dataList)
   {
     let referenceObject = dataList[this.DATA_LIST_LIST_FIELD_NAME][item[this.DATA_LIST_ID_FIELD_NAME]]
     return referenceObject
@@ -583,7 +589,7 @@ module.exports = {
     let referenceObject = null
     if(await this.dataListItemFieldExists(object, this.DATA_LIST_ID_FIELD_NAME) == true)
     {
-      referenceObject = await this.getReferenceObjectToDataList(object, dataList)
+      referenceObject = await this.generateReferenceObjectToDataList(object)
     }
     else
     {
@@ -601,7 +607,7 @@ module.exports = {
     return referenceObject
   },
   
-  getReferenceObjectToDataList: async function(object, dataList)
+  generateReferenceObjectToDataList: async function(object)
   {
     let referenceObject = await this.createReferenceObjectFromId(await this.getDataListItemFieldValue(this.DATA_LIST_ID_FIELD_NAME, object))
     return referenceObject

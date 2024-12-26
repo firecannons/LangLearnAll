@@ -130,6 +130,7 @@ module.exports = {
   {
     let runPageHtmlCodeBase = await this.readRawTextFile(await this.getRunHtmlFilePath())
     let pluginCode = await this.generateRunPagePluginCode()
+    console.log('plugin code', pluginCode)
     let runPageGeneratedHtmlCode = await runPageHtmlCodeBase.replace(this.RUN_PAGE_TEXT_TO_REPLACE, pluginCode)
     return runPageGeneratedHtmlCode
   },
@@ -139,6 +140,7 @@ module.exports = {
     let collectionData = await this.getDataListCollectionFromColletionFieldName(this.RUN_PAGE_DATA_LIST_MAIN_TYPE)
     let dataList = await this.getAllDataListItems(collectionData)
     let generatedPluginCode = await this.getAllGeneratedPluginCode(collectionData, dataList)
+    return generatedPluginCode
   },
   
   getAllGeneratedPluginCode: async function(collectionData, dataList)
@@ -150,12 +152,12 @@ module.exports = {
     {
       let dataItem = listDataItself[itemKey]
       let referenceObject = await this.generateReferenceObjectToDataList(dataItem)
-      console.log('getting code' , collectionData, referenceObject, dataItem, dataList)
       completeDataItem = await this.readFileFields(collectionData, referenceObject, dataItem)
       let code = await this.getDataListItemFieldValue(this.CODE_TEXT_IDS[0], completeDataItem)
-      allCode = code + '\n'
+      allCode = allCode + code
+      allCode = allCode + '\n'
     }
-    return dataList
+    return allCode
   },
   
   

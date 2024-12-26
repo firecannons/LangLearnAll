@@ -96,3 +96,97 @@ async function deepCopyObject(object)
 {
   return await JSON.parse(await JSON.stringify(object));
 }
+
+
+
+
+
+
+const CALLBACK_REGISTER_STATUS_FIELD_NAME = 'status'
+const CALLBACK_REGISTER_STATUS_TRIGGERED = 'triggered'
+const CALLBACK_REGISTER_STATUS_UNTRIGGERED = 'untriggered'
+
+const CALLBACK_REGISTER_CALLBACK_FUNCTIONS_FIELD_NAME = 'callbackFunctions'
+
+const CALLBACK_REGISTER_DATA_FIELD_NAME = 'data'
+
+var globalCallbacks = {}
+
+async function createCallbackRegister(id)
+{
+  globalCallbacks[id] = {[CALLBACK_REGISTER_STATUS_FIELD_NAME]: CALLBACK_REGISTER_STATUS_UNTRIGGERED,
+    [CALLBACK_REGISTER_CALLBACK_FUNCTIONS_FIELD_NAME]: []}
+}
+
+async function triggerCallbackRegister(id, data)
+{
+  await createCallbackRegisterIfNotCreated(id)
+  await setCallbackRegisterData(id, data)
+  globalCallbacks[id][CALLBACK_REGISTER_STATUS_FIELD_NAME] = CALLBACK_REGISTER_STATUS_TRIGGERED
+  await runAllRegisteredCallbackFunctions(id)
+}
+
+async function runAllRegisteredCallbackFunctions(id)
+{
+  let callbackFunctions = globalCallbacks[id][CALLBACK_REGISTER_CALLBACK_FUNCTIONS_FIELD_NAME]
+  for(let callbackFunction of callbackFunctions)
+  {
+    await callbackFunction(await getCallbackRegisterData(id))
+  }
+}
+
+async function registerCallbackFunction(id, callbackFunction)
+{
+  await createCallbackRegisterIfNotCreated(id)
+  await globalCallbacks[id][CALLBACK_REGISTER_CALLBACK_FUNCTIONS_FIELD_NAME].push(callbackFunction)
+  if(await isCallbackRegisterTriggered(id) == true)
+  {
+    let callbackFunction = await globalCallbacks[CALLBACK_REGISTER_CALLBACK_FUNCTIONS_FIELD_NAME].slice(-1)
+    await callbackFunction(await getCallbackRegisterData(id))
+  }
+}
+
+async function createCallbackRegisterIfNotCreated(id)
+{
+  if(await doesCallbackRegisterExist(id) == false)
+  {
+    await createCallbackRegister(id)
+  }
+}
+
+async function doesCallbackRegisterExist(id)
+{
+  let doesExist = false
+  if(globalCallbacks[id] != null)
+  {
+    doesExist = true
+  }
+  return doesExist
+}
+
+async function isCallbackRegisterTriggered(id)
+{
+  let isTriggered = false
+  if(globalCallbacks[id][CALLBACK_REGISTER_STATUS_FIELD_NAME] == CALLBACK_REGISTER_STATUS_TRIGGERED)
+  {
+    isTriggered = true
+  }
+  return isTriggered
+}
+
+async function getCallbackRegisterStatus(id)
+{
+  let status = globalCallbacks[id][CALLBACK_REGISTER_STATUS_FIELD_NAME]
+  return status
+}
+
+async function getCallbackRegisterData(id)
+{
+  let data = globalCallbacks[id][CALLBACK_REGISTER_DATA_FIELD_NAME]
+  return data
+}
+
+async function setCallbackRegisterData(id, data)
+{
+  globalCallbacks[id][CALLBACK_REGISTER_DATA_FIELD_NAME] = data
+}

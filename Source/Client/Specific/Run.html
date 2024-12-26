@@ -34,7 +34,7 @@
     
     let bodyHoldingDiv = await addDiv(holdingDiv)
     await addGenericTitle(bodyHoldingDiv, 'Run')
-    await addClassToElement(bodyHoldingDiv, 'runBodyHoldingElement')
+    window.addEventListener('load', await triggerCallbackRegister.bind(null, 'genericOnLoad', bodyHoldingDiv))
   }
   
   createPage()

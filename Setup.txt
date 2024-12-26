@@ -7,3 +7,12 @@ To install:
 cd Source
 cd Server
 npm install express body-parser
+
+#To Deploy:
+git stash
+git pull
+cd Source
+cd Server
+sudo fuser -KILL -k -n tcp 3004
+nohup node app.js &
+disown
